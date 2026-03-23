@@ -260,8 +260,12 @@
     <!-- initialMode = chế độ khởi tạo ('login' hoặc 'register') -->
     <!-- @close = sự kiện khi đóng modal (cập nhật showAuthModal = false) -->
     <AuthModal :isOpen="showAuthModal" :initialMode="authMode" @close="showAuthModal = false" />
+
+    <ScrollToTop />
   </div>
 </template>
+
+
 
 <script setup>
 // ===== KHAI BÁO BIẾN TRẠNG THÁI (REACTIVE VARIABLES) =====
@@ -294,6 +298,8 @@ const openAuthModal = (mode) => {
   showAuthModal.value = true
 }
 </script>
+
+
 
 <style scoped>
 /* ===== ANIMATION: FADE-SCALE TRANSITION CHO DROPDOWN =====*/
