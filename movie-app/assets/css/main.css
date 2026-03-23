@@ -1,0 +1,21 @@
+/* Kích hoạt Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Thiết lập phong cách chung cho Web Phim (Dark Mode - Netflix style: Đen + Xanh lá) */
+body {
+  @apply bg-black text-white font-sans;
+  /* Nền đen giống Netflix, với xanh lá làm highlight */
+}
+
+/* Tùy chỉnh thanh cuộn (Scrollbar) cho chuyên nghiệp */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-900;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-emerald-600 rounded-full;
+}
