@@ -3,18 +3,25 @@
     <header class="bg-gradient-to-b from-black via-gray-950 to-black backdrop-blur-md sticky top-0 z-50 border-b border-emerald-600/30">
       <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
         <!-- PHẦN 1: LOGO + TÊN WEBSITE -->
-        <div class="flex items-center gap-2 text-2xl font-bold text-emerald-500 tracking-tighter uppercase">
-          <!-- Icon phim: biểu tượng ngành công nghiệp -->
-          <Icon name="heroicons:film-solid" class="w-8 h-8" />
-          <!-- Tên website: KHANLIX = nền tảng xem phim -->
-          KHANLIX
-        </div>
+        <NuxtLink to="/">
+          <div 
+            @click="goHome"
+            class="flex items-center gap-2 text-2xl font-bold text-emerald-500 tracking-tighter uppercase cursor-pointer hover:opacity-80 transition"
+          >
+            <!-- Icon phim: biểu tượng ngành công nghiệp -->
+            <Icon name="heroicons:film-solid" class="w-8 h-8" />
+            <!-- Tên website: KHANLIX = nền tảng xem phim -->
+            KHANLIX
+          </div>
+        </NuxtLink>
         <div class="flex items-center gap-6">
           <!-- PHẦN 2: MENU ĐIỀU HƯỚNG CHÍNH -->
           <!-- 3 trang chính: Trang chủ, Phim Lẻ, Phim Bộ -->
           <ul class="flex gap-6 font-medium text-white">
-            <!-- Link Trang chủ: điều hướng về index page -->
-            <li><NuxtLink to="/" class="hover:text-emerald-500 transition">Trang chủ</NuxtLink></li>
+            <!-- Link Trang chủ: điều hướng về index page và clear search -->
+            <li>
+              <NuxtLink to="/" @click="goHome" class="hover:text-emerald-500 transition">Trang chủ</NuxtLink>
+            </li>
             <!-- Link Phim Lẻ: để xem các bộ phim đơn (chưa có page này) -->
             <li><NuxtLink to="#" class="hover:text-emerald-500 transition">Phim Lẻ</NuxtLink></li>
             <!-- Link Phim Bộ: để xem các series/phim tập (chưa có page này) -->
@@ -103,13 +110,19 @@
         
         <!-- PHẦN 4: SEARCH VÀ AUTH BUTTONS -->
         <div class="flex items-center gap-4">
-          <!-- TÒM KIẾM: Input giả lập (search functionality) -->
-          <!-- Hiển thị placeholder "Tìm kiếm phim..." để gợi ý người dùng -->
-          <div class="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 border border-emerald-600/50 px-4 py-2 rounded-full text-sm text-white transition cursor-pointer">
+          <!-- TÌM KIẾM: Input tìm kiếm phim -->
+          <!-- Chỉ tìm kiếm khi bấm Enter để tối ưu -->
+          <div class="flex items-center bg-gray-900 hover:bg-gray-800 border border-emerald-600/50 px-3 py-2 rounded-full text-sm text-white transition w-56 flex-shrink-0">
             <!-- Icon kính lúp: biểu tượng tìm kiếm -->
-            <Icon name="heroicons:magnifying-glass-solid" class="w-4 h-4" />
-            <!-- Placeholder text: "Tìm kiếm phim..." -->
-            Tìm kiếm phim...
+            <Icon name="heroicons-solid:magnifying-glass" class="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            <!-- Input thực tế -->
+            <input 
+              v-model="searchInput"
+              @keyup.enter="handleSearch"
+              type="text"
+              placeholder="Tìm kiếm phim..."
+              class="flex-1 bg-transparent outline-none placeholder-gray-500 ml-2 text-white"
+            />
           </div>
 
           <!-- NÚT ĐĂNG NHẬP -->
@@ -285,6 +298,10 @@ const authMode = ref('login')
 // Mở/Đóng khi @mouseenter/@mouseleave trên dropdown section
 const showCategoryDropdown = ref(false)
 
+// searchInput: lưu từ khóa tìm kiếm tạm thời
+// Chỉ update route.query khi user bấm Enter
+const searchInput = ref('')
+
 // ===== CÁC HÀM XỬ LÝ (FUNCTIONS) =====
 
 // openAuthModal(mode): mở modal auth với chế độ cụ thể
@@ -296,6 +313,26 @@ const openAuthModal = (mode) => {
   authMode.value = mode
   // Mở modal (showAuthModal = true)
   showAuthModal.value = true
+}
+
+// handleSearch(): xử lý tìm kiếm khi user bấm Enter
+// Cập nhật route.query với giá trị tìm kiếm hiện tại
+const handleSearch = () => {
+  useRouter().push({ query: { search: searchInput.value } })
+}
+
+// watch: theo dõi route.query.search để cập nhật searchInput từ URL
+// Khi user vào từ URL với search param, cập nhật input value
+watch(() => useRoute().query.search, (newVal) => {
+  searchInput.value = newVal || ''
+})
+
+// goHome(): quay lại trang chủ và xóa tất cả filter/search
+// Được gọi khi click vào logo hoặc nút "Trang chủ"
+// Xóa tất cả query params để trigger reset filter trong index.vue
+const goHome = () => {
+  searchInput.value = ''
+  useRouter().push({ path: '/', query: {} })  // Xóa tất cả query params
 }
 </script>
 
