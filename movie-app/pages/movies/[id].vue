@@ -7,38 +7,52 @@
  * - Chương 9.3: SEO optimization
  */
 
-// ========== ROUTER  + ROUTE PARAMETERS ==========
-const route = useRoute()
-const movieId = computed(() => parseInt(route.params.id as string))
+import { useMovieDetail } from '~/composables/useMovieDetail'
+import { useVideoPlayer } from '~/composables/useVideoPlayer'
+import { useNavigation } from '~/composables/useNavigation'
+import { useMovieStore } from '~/stores/movieStore'
+import { generateMovieMeta, generatePageTitle } from '~/utils/seo'
+import { addToWatchHistory, setMovieProgress } from '~/utils/localStorage'
+import { watch, ref, computed } from 'vue'
 
 // ========== LẤY DỮ LIỆU PHIM ==========
 const isLoading = ref(true)
-
-// Fetch API để lấy thông tin phim
 const { data: allMovies } = await useFetch('/api/movies')
-
-// Tìm phim dựa vào ID
-const movie = computed(() => {
-  if (!allMovies.value) return null
-  return allMovies.value.find((m: any) => m.id === movieId.value)
-})
-
 isLoading.value = false
 
-// ========== REACTIVE OBJECT - TRẠNG THÁI XEM PHIM ==========
-const watchState = reactive({
-  currentTime: 0,
-  isPlaying: false,
-  isMuted: false,
-  playbackRate: 1
+// ========== MOVIE DETAIL COMPOSABLE ==========
+const { movieId, movie, isMovieFound } = useMovieDetail(allMovies)
+
+// ========== VIDEO PLAYER COMPOSABLE ==========
+const { playerState, togglePlay, toggleMute, handleProgressClick, getProgressPercentage } = useVideoPlayer()
+
+// ========== NAVIGATION COMPOSABLE ==========
+const { goBack } = useNavigation()
+
+// ========== MOVIE STORE - FAVORITES ==========
+const movieStore = useMovieStore()
+
+// Check nếu phim hiện tại là favorite
+const isFavorited = computed(() => {
+  return movieStore.isFavorited(movieId.value)
 })
+
+// Toggle favorite
+const toggleFavorite = async () => {
+  await movieStore.toggleFavorite(movieId.value)
+}
 
 // ========== WATCHER - GHI LỮC SỬ XEM ==========
 // Side effect: Lưu trạng thái xem phim vào localStorage
 watch(
-  () => ({ id: movieId.value, time: watchState.currentTime }),
+  () => ({ id: movieId.value, time: playerState.currentTime }),
   (newState) => {
-    console.log(`[WATCH] Đang xem: ${newState.id}, tiến độ: ${newState.time}s`)
+    if (movie.value) {
+      // Ghi nhận lịch sử xem phim và tiến độ
+      console.log(`[WATCH] Đang xem: ${newState.id}, tiến độ: ${newState.time}s`)
+      addToWatchHistory(newState.id, movie.value.title)
+      setMovieProgress(newState.id, newState.time, 5400)
+    }
   },
   { deep: true }
 )
@@ -46,50 +60,9 @@ watch(
 // ========== SEO OPTIMIZATION ==========
 // Meta tags động dựa vào thông tin phim
 useHead({
-  title: () => `${movie.value?.title || 'Phim'} | KHANLIX`,
-  meta: () => [
-    {
-      name: 'description',
-      content: `Xem phim ${movie.value?.title}. Thể loại: ${movie.value?.genre}. Năm phát hành: ${movie.value?.year}. Rating: ${movie.value?.rating}/10`
-    },
-    {
-      name: 'keywords',
-      content: `${movie.value?.title}, xem phim, ${movie.value?.genre}, ${movie.value?.year}`
-    },
-    {
-      property: 'og:title',
-      content: `${movie.value?.title} | KHANLIX`
-    },
-    {
-      property: 'og:description',
-      content: `Xem ${movie.value?.title} trực tuyến với chất lượng HD`
-    },
-    {
-      property: 'og:image',
-      content: `http://localhost:3000${movie.value?.poster || ''}`
-    },
-    {
-      property: 'og:type',
-      content: 'video.movie'
-    }
-  ]
+  title: () => generatePageTitle(movie.value || { title: 'Phim' }),
+  meta: () => movie.value ? generateMovieMeta(movie.value) : []
 })
-
-// ========== FUNCTIONS ==========
-const togglePlay = () => {
-  watchState.isPlaying = !watchState.isPlaying
-}
-
-const toggleMute = () => {
-  watchState.isMuted = !watchState.isMuted
-}
-
-const handleProgressClick = (event: MouseEvent) => {
-  const target = event.currentTarget as HTMLDivElement
-  if (target) {
-    watchState.currentTime = Math.floor((event.offsetX / target.offsetWidth) * 5400)
-  }
-}
 </script>
 
 <template>
@@ -98,7 +71,7 @@ const handleProgressClick = (event: MouseEvent) => {
     <LoadingSpinner :isVisible="isLoading" />
 
     <!-- Phim Không Tìm Thấy -->
-    <div v-if="!isLoading && !movie" class="flex items-center justify-center py-20">
+    <div v-if="!isLoading && !isMovieFound" class="flex items-center justify-center py-20">
       <div class="text-center">
         <Icon name="heroicons-solid:exclamation-circle" class="w-16 h-16 text-red-500 mx-auto mb-4" />
         <h1 class="text-4xl font-bold text-white mb-2">Phim Không Tìm Thấy</h1>
@@ -108,38 +81,62 @@ const handleProgressClick = (event: MouseEvent) => {
 
     <!-- Chi Tiết Phim -->
     <div v-else-if="movie" class="pb-12">
-      <!-- Sticky Back Button -->
-      <NuxtLink 
-        to="/" 
-        class="fixed left-4 top-24 z-40 p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition transform hover:scale-110"
-        title="Quay Lại Trang Chủ"
-      >
-        <Icon name="heroicons-solid:arrow-left" class="w-6 h-6" />
-      </NuxtLink>
+      <!-- Header Section với Back Button -->
+      <div class="mb-12 pt-8 px-4 sm:px-8">
+        <div class="container mx-auto">
+          <div class="flex items-center justify-between mb-8">
+            <!-- Tiêu Đề -->
+            <div>
+              <h1 class="text-4xl font-bold text-white">{{ movie.title }}</h1>
+              <div class="flex items-center gap-2 mt-2 text-gray-400">
+                <span>{{ movie.year }}</span>
+                <span class="text-gray-600">•</span>
+                <span>{{ movie.genre }}</span>
+                <span class="text-gray-600">•</span>
+                <div class="flex items-center gap-1 text-emerald-400 font-semibold">
+                  <Icon name="heroicons-solid:star" class="w-4 h-4" />
+                  {{ movie.rating }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Back Button -->
+            <NuxtLink 
+              to="/" 
+              class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+              title="Quay Lại Trang Chủ"
+            >
+              <Icon name="heroicons-solid:arrow-left" class="w-5 h-5" />
+              Quay Lại
+            </NuxtLink>
+          </div>
+
+          <!-- Separator -->
+          <div class="h-px bg-gradient-to-r from-emerald-600/50 via-emerald-600 to-emerald-600/50"></div>
+        </div>
+      </div>
 
       <!-- Hero Section -->
-      <div class="relative pt-12 px-4 sm:px-8">
+      <div class="relative px-4 sm:px-8">
         <div class="container mx-auto">
           <!-- Main Content -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Poster (Left) -->
             <div class="md:col-span-1">
-              <img 
+              <NuxtImg 
                 :src="movie.poster" 
-                :alt="movie.title" 
+                :alt="movie.title"
+                loading="lazy"
                 class="w-full h-auto rounded-lg shadow-2xl sticky top-24"
               />
             </div>
 
             <!-- Info (Right) -->
             <div class="md:col-span-2">
-              <!-- Tiêu Đề -->
-              <h1 class="text-5xl font-bold text-white mb-4">{{ movie.title }}</h1>
-
               <!-- Meta Info -->
               <div class="flex flex-wrap items-center gap-4 mb-6 pb-6 border-b border-gray-600">
-                <div class="flex items-center gap-2 bg-yellow-600/20 px-4 py-2 rounded-lg">
-                  <Icon name="heroicons-solid:star" class="w-5 h-5 text-yellow-400" />
+                <div class="flex items-center gap-2 bg-emerald-600/20 px-4 py-2 rounded-lg">
+                  <Icon name="heroicons-solid:star" class="w-5 h-5 text-emerald-400" />
                   <span class="text-white font-bold">{{ movie.rating }}/10</span>
                 </div>
                 <span class="text-gray-300">{{ movie.year }}</span>
@@ -165,9 +162,20 @@ const handleProgressClick = (event: MouseEvent) => {
                   <Icon name="heroicons-solid:play" class="w-5 h-5" />
                   Xem Ngay
                 </button>
-                <button class="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition flex items-center gap-2">
-                  <Icon name="heroicons-solid:heart" class="w-5 h-5" />
-                  Yêu Thích
+                <button 
+                  @click="toggleFavorite"
+                  :class="[
+                    'px-8 py-3 font-semibold rounded-lg transition flex items-center gap-2',
+                    isFavorited
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/50'
+                      : 'bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500'
+                  ]"
+                >
+                  <Icon 
+                    :name="isFavorited ? 'heroicons-solid:heart' : 'heroicons:heart'"
+                    class="w-5 h-5"
+                  />
+                  {{ isFavorited ? 'Đã Yêu Thích' : 'Yêu Thích' }}
                 </button>
               </div>
             </div>
@@ -218,28 +226,28 @@ const handleProgressClick = (event: MouseEvent) => {
                       @click="togglePlay"
                       :class="[
                         'px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 text-sm',
-                        watchState.isPlaying
+                        playerState.isPlaying
                           ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                           : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
                       ]"
                     >
-                      <Icon :name="watchState.isPlaying ? 'heroicons-solid:pause' : 'heroicons-solid:play'" class="w-4 h-4" />
-                      {{ watchState.isPlaying ? 'Tạm Dừng' : 'Phát' }}
+                      <Icon :name="playerState.isPlaying ? 'heroicons-solid:pause' : 'heroicons-solid:play'" class="w-4 h-4" />
+                      {{ playerState.isPlaying ? 'Tạm Dừng' : 'Phát' }}
                     </button>
 
                     <button
                       @click="toggleMute"
                       :class="[
                         'px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 text-sm',
-                        watchState.isMuted
+                        playerState.isMuted
                           ? 'bg-red-600 hover:bg-red-700 text-white'
                           : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
                       ]"
                     >
-                      <Icon :name="watchState.isMuted ? 'heroicons-solid:speaker-x-mark' : 'heroicons-solid:speaker-wave'" class="w-4 h-4" />
+                      <Icon :name="playerState.isMuted ? 'heroicons-solid:speaker-x-mark' : 'heroicons-solid:speaker-wave'" class="w-4 h-4" />
                     </button>
 
-                    <select v-model.number="watchState.playbackRate" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm font-semibold">
+                    <select v-model.number="playerState.playbackRate" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm font-semibold">
                       <option :value="0.5">0.5x</option>
                       <option :value="1">1x</option>
                       <option :value="1.5">1.5x</option>
@@ -248,10 +256,10 @@ const handleProgressClick = (event: MouseEvent) => {
                   </div>
 
                   <!-- Progress Bar -->
-                  <div class="w-full bg-gray-700 rounded-full h-1.5 cursor-pointer hover:h-2 transition" @click="handleProgressClick">
+                  <div class="w-full bg-gray-700 rounded-full h-1.5 cursor-pointer hover:h-2 transition" @click="handleProgressClick($event, 5400)">
                     <div
                       class="bg-emerald-600 h-full rounded-full transition-all duration-100"
-                      :style="{ width: `${(watchState.currentTime / 5400) * 100}%` }"
+                      :style="{ width: `${getProgressPercentage(5400)}%` }"
                     />
                   </div>
                 </div>

@@ -1,14 +1,28 @@
 <script setup lang="ts">
 // ============================================
-// PHƯƠNG B: REFACTOR THEO LÝ THUYẾT BÁNG (100% MATCH)
-// Sử dụng custom composables + reactive() + watchers
+// IMPORT COMPOSABLES & UTILITIES
 // ============================================
+import { useCarousel } from '~/composables/useCarousel'
+import { useNavigation } from '~/composables/useNavigation'
+import { useErrorHandler } from '~/composables/useError'
 
 // ============================================
-// 1. LẤY DỮ LIỆU PHIM TỪ API (Chương 8.4)
+// ========== 1. LẤY DỮ LIỆU PHIM TỪ API (Chương 8.4)
 // ============================================
 const isLoading = ref(true)
-const { data: allMovies } = await useFetch('/api/movies')
+const { addError } = useErrorHandler()
+
+const allMovies = ref<any[]>([])
+try {
+  const { data, error } = await useFetch('/api/movies')
+  if (error.value || !data.value) {
+    addError('Lỗi tải danh sách phim. Vui lòng làm mới trang.')
+  } else {
+    allMovies.value = data.value
+  }
+} catch (err: any) {
+  addError(err.message || 'Lỗi khi tải dữ liệu từ server')
+}
 isLoading.value = false
 
 // ============================================
@@ -16,8 +30,8 @@ isLoading.value = false
 // ============================================
 // useMovieFilter - quản lý logic filter phim
 const { 
-  activeGenreFilter, 
-  activeYearFilter, 
+  activeGenreFilters, 
+  activeYearFilters, 
   filterCurrentPage,
   allGenres,
   allYears,
@@ -59,6 +73,9 @@ const {
   goToPageTrending,
   goToPageToday
 } = useMovieCategories(allMovies)
+
+// useNavigation - xử lý navigation
+const { goHome } = useNavigation()
 
 // ============================================
 // 2.5. TRẠNG THÁI UI
@@ -123,76 +140,8 @@ const advertisements = [
   }
 ]
 
-const currentAdIndex = ref(0)
-let autoSlideInterval: ReturnType<typeof setInterval> | null = null
-
-const nextAd = () => {
-  currentAdIndex.value = (currentAdIndex.value + 1) % advertisements.length
-}
-
-const prevAd = () => {
-  currentAdIndex.value = (currentAdIndex.value - 1 + advertisements.length) % advertisements.length
-}
-
-const goToAd = (index: number) => {
-  currentAdIndex.value = index
-  if (autoSlideInterval) {
-    clearInterval(autoSlideInterval)
-    startAutoSlide()
-  }
-}
-
-const startAutoSlide = () => {
-  autoSlideInterval = setInterval(() => {
-    nextAd()
-  }, 5000)
-}
-
-onMounted(() => {
-  startAutoSlide()
-})
-
-onUnmounted(() => {
-  if (autoSlideInterval) {
-    clearInterval(autoSlideInterval)
-  }
-})
-
-// ============================================
-// 4. OBJ REACTIVE - CHI TIẾT PHIM (Chương 4.1.3)
-// ============================================
-// Demo sử dụng reactive() cho cấu trúc dữ liệu phức tạp
-// reactive() phù hợp hơn ref() khi làm việc với object nhiều thuộc tính
-const selectedMovieState = reactive({
-  movieId: null as number | null,
-  isDetailOpen: false,
-  watchedTime: 0,
-  isWatched: false,
-  rating: 0,
-  review: ''
-})
-
-// ============================================
-// 5. WATCHERS - CÁC HIỆU ỨNG PHỤ (Chương 4.2.2)
-// ============================================
-// Watcher để xử lý hiệu ứng phụ khi selectedMovieState thay đổi
-// Lưu dữ liệu vào localStorage khi xem phim (hiệu ứng phụ)
-watch(
-  () => selectedMovieState,
-  (newState) => {
-    if (newState.movieId) {
-      // Ghi nhận lịch sử xem phim (hiệu ứng phụ - không phải pure function)
-      console.log(`[WATCH] Đang xem phim: ${newState.movieId}, tiến độ: ${newState.watchedTime}s`)
-      // Ở đây có thể lưu vào localStorage
-      // localStorage.setItem('watchHistory', JSON.stringify(newState))
-    }
-  },
-  { deep: true }
-)
-
-// ============================================
-// 6. PHÂN TRANG TÌM KIẾM
-// ============================================
+// ========== CAROUSEL COMPOSABLE ==========
+const { currentIndex: currentAdIndex, nextItem: nextAd, prevItem: prevAd, goToItem: goToAd } = useCarousel(ref(advertisements))
 const goToSearchPage = async (pageNumber: number) => {
   const router = useRouter()
   if (pageNumber >= 1 && pageNumber <= totalSearchPages.value) {
@@ -218,8 +167,8 @@ const toggleFilter = () => {
     <!-- Loadinng Spinner -->
     <LoadingSpinner :isVisible="isLoading" />
     
-    <!-- ====== CAROUSEL QUẢNG CÁO ====== -->
-    <div class="mb-24 relative overflow-hidden rounded-2xl bg-gradient-to-r shadow-2xl">
+    <!-- ====== CAROUSEL QUẢNG CÁO (ẩn khi tìm kiếm) ====== -->
+    <div v-if="!isSearchMode" class="mb-24 relative overflow-hidden rounded-2xl bg-gradient-to-r shadow-2xl">
       <!-- Gradient nền được chọn từ dữ liệu quảng cáo -->
       <div v-if="advertisements[currentAdIndex]" :class="`bg-gradient-to-r ${advertisements[currentAdIndex]?.color}`" class="transition-all duration-700">
         <!-- Vòng tròn mờ động -->
@@ -367,7 +316,7 @@ const toggleFilter = () => {
             @click="filterByGenre(genre)"
             :class="[
               'px-4 py-2 rounded-lg font-semibold transition text-sm',
-              activeGenreFilter === genre
+              activeGenreFilters.has(genre)
                 ? 'bg-emerald-600 text-white'
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
             ]"
@@ -387,7 +336,7 @@ const toggleFilter = () => {
             @click="filterByYear(year)"
             :class="[
               'px-4 py-2 rounded-lg font-semibold transition text-sm',
-              activeYearFilter === year
+              activeYearFilters.has(year)
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
             ]"
@@ -412,15 +361,32 @@ const toggleFilter = () => {
     <div v-if="isFilterMode" class="mb-24">
       <!-- Tiêu đề chế độ lọc -->
       <div class="mb-10 p-6 rounded-lg bg-gradient-to-r from-emerald-600/20 to-blue-600/20 border border-emerald-600/30">
-        <h2 class="text-3xl font-bold text-white mb-2">
+        <h2 class="text-3xl font-bold text-white mb-4">
           Kết Quả Lọc
           <span class="text-emerald-400 text-lg">({{ filteredMovies.length }} phim)</span>
         </h2>
-        <p class="text-gray-400 text-sm">
-          Lọc: 
-          <span v-if="activeGenreFilter" class="text-emerald-400 font-semibold">{{ activeGenreFilter }}</span>
-          <span v-if="activeYearFilter" class="text-blue-400 font-semibold">{{ activeYearFilter }}</span>
-        </p>
+        <!-- Hiển thị các tiêu chí lọc đã chọn -->
+        <div v-if="activeGenreFilters.size > 0 || activeYearFilters.size > 0" class="flex flex-wrap gap-2 items-center">
+          <span class="text-gray-400 text-sm">Lọc:</span>
+          <!-- Thể loại -->
+          <span 
+            v-for="genre in activeGenreFilters" 
+            :key="genre"
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-600/30 border border-emerald-500 text-emerald-300 text-sm font-semibold"
+          >
+            {{ genre }}
+            <button @click="filterByGenre(genre)" class="hover:text-emerald-100">✕</button>
+          </span>
+          <!-- Năm -->
+          <span 
+            v-for="year in activeYearFilters" 
+            :key="year"
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-600/30 border border-blue-500 text-blue-300 text-sm font-semibold"
+          >
+            {{ year }}
+            <button @click="filterByYear(year)" class="hover:text-blue-100">✕</button>
+          </span>
+        </div>
       </div>
       
       <!-- Grid phim lọc: 4 phim/hàng -->

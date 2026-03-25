@@ -101,7 +101,7 @@ const handleSubmit = () => {
             @click="emit('close')"
             class="text-gray-400 hover:text-white transition"
           >
-            <Icon name="heroicons:x-mark-solid" class="w-6 h-6" />
+              <Icon name="heroicons-solid:x-mark" class="w-6 h-6" />
           </button>
         </div>
 
@@ -142,7 +142,7 @@ const handleSubmit = () => {
                     class="absolute right-0 top-0 h-full px-4 flex items-center justify-center text-gray-400 hover:text-emerald-400 transition pointer-events-auto"
                   >
                     <!-- Icon mắt: eye (hiện) hay eye-slash (ẩn) -->
-                    <Icon :name="showPassword ? 'heroicons:eye-slash-solid' : 'heroicons:eye-solid'" class="w-5 h-5" />
+                    <Icon :name="showPassword ? 'heroicons-solid:eye-slash' : 'heroicons-solid:eye'" class="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -210,7 +210,7 @@ const handleSubmit = () => {
                     @click="showPassword = !showPassword"
                     class="absolute right-0 top-0 h-full px-4 flex items-center justify-center text-gray-400 hover:text-emerald-400 transition pointer-events-auto"
                   >
-                    <Icon :name="showPassword ? 'heroicons:eye-slash-solid' : 'heroicons:eye-solid'" class="w-5 h-5" />
+                    <Icon :name="showPassword ? 'heroicons-solid:eye-slash' : 'heroicons-solid:eye'" class="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -232,7 +232,7 @@ const handleSubmit = () => {
                     @click="showConfirmPassword = !showConfirmPassword"
                     class="absolute right-0 top-0 h-full px-4 flex items-center justify-center text-gray-400 hover:text-emerald-400 transition pointer-events-auto"
                   >
-                    <Icon :name="showConfirmPassword ? 'heroicons:eye-slash-solid' : 'heroicons:eye-solid'" class="w-5 h-5" />
+                    <Icon :name="showConfirmPassword ? 'heroicons-solid:eye-slash' : 'heroicons-solid:eye'" class="w-5 h-5" />
                   </button>
                 </div>
               </div>

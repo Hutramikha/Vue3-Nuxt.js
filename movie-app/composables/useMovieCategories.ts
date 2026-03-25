@@ -1,6 +1,7 @@
 /**
  * useMovieCategories Composable
  * Quản lý logic hiển thị các danh mục phim (New, Hot, MostViewed, Trending, Today)
+ * Hỗ trợ 50 phim: 10 phim/danh mục × 5 danh mục
  * Phù hợp với Chương 5.3: Custom Composables
  */
 
@@ -14,31 +15,31 @@ export function useMovieCategories(allMovies: any) {
     new: {
       name: 'Phim Mới Cập Nhật',
       startIndex: 0,
-      endIndex: 20,
+      endIndex: 10,
       currentPage: ref(1)
     },
     hot: {
-      name: 'Phim Hot Hiện Tại',
-      startIndex: 20,
-      endIndex: 40,
+      name: 'Phim Kinh Điển',
+      startIndex: 10,
+      endIndex: 20,
       currentPage: ref(1)
     },
     mostViewed: {
-      name: 'Phim Được Xem Nhiều',
-      startIndex: 40,
-      endIndex: 60,
+      name: 'Phim Kinh Điển II',
+      startIndex: 20,
+      endIndex: 30,
       currentPage: ref(1)
     },
     trending: {
       name: 'Trending Hôm Nay',
-      startIndex: 60,
-      endIndex: 80,
+      startIndex: 30,
+      endIndex: 40,
       currentPage: ref(1)
     },
     today: {
       name: 'Phim Lẻ Mới Ra Mắt',
-      startIndex: 80,
-      endIndex: 100,
+      startIndex: 40,
+      endIndex: 50,
       currentPage: ref(1)
     }
   }
@@ -47,7 +48,7 @@ export function useMovieCategories(allMovies: any) {
   // Lấy danh sách phim đã phân trang cho một danh mục
   const getPaginatedMovies = (startIndex: number, currentPage: number) => {
     if (!allMovies.value || allMovies.value.length === 0) return []
-    const categoryMovies = allMovies.value.slice(startIndex, startIndex + 20)
+    const categoryMovies = allMovies.value.slice(startIndex, startIndex + 10)
     const start = (currentPage - 1) * moviesPerPage
     const end = start + moviesPerPage
     return categoryMovies.slice(start, end)
@@ -56,7 +57,7 @@ export function useMovieCategories(allMovies: any) {
   // Tính tổng số trang của một danh mục
   const getTotalPages = () => {
     if (!allMovies.value || allMovies.value.length === 0) return 0
-    return Math.ceil(20 / moviesPerPage)
+    return Math.ceil(10 / moviesPerPage)
   }
 
   // ========== GETTERS - NEW CATEGORY ==========

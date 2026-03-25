@@ -9,7 +9,7 @@
             class="flex items-center gap-2 text-2xl font-bold text-emerald-500 tracking-tighter uppercase cursor-pointer hover:opacity-80 transition"
           >
             <!-- Icon phim: biểu tượng ngành công nghiệp -->
-            <Icon name="heroicons:film-solid" class="w-8 h-8" />
+            <Icon name="heroicons-solid:film" class="w-8 h-8" />
             <!-- Tên website: KHANLIX = nền tảng xem phim -->
             KHANLIX
           </div>
@@ -35,7 +35,7 @@
             <button class="flex items-center gap-1 text-white hover:text-emerald-500 transition font-medium py-2">
               <span>Danh Mục</span>
               <!-- Icon mũi tên: xoay 180° khi dropdown mở (rotate-180 class) -->
-              <Icon name="heroicons:chevron-down-solid" class="w-4 h-4" :class="{ 'rotate-180': showCategoryDropdown }" />
+              <Icon name="heroicons-solid:chevron-down" class="w-4 h-4" :class="{ 'rotate-180': showCategoryDropdown }" />
             </button>
 
             <!-- VÙNG HOVER Vborgo: Giữ dropdown mở khi di chuột từ button xuống -->
@@ -108,8 +108,28 @@
           </div>
         </div>
         
-        <!-- PHẦN 4: SEARCH VÀ AUTH BUTTONS -->
-        <div class="flex items-center gap-4">
+        <!-- PHẦN 4: FAVORITES, HISTORY, SEARCH VÀ AUTH BUTTONS -->
+        <div class="flex items-center gap-3">
+          <!-- NÚT YÊU THÍCH -->
+          <!-- Link đến trang phim yêu thích -->
+          <NuxtLink 
+            to="/favorites"
+            class="p-2 text-white hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition flex items-center gap-1"
+            title="Phim Yêu Thích"
+          >
+            <Icon name="heroicons-solid:heart" class="w-5 h-5 text-white" />
+          </NuxtLink>
+
+          <!-- NÚT LỊCH SỬ XEM -->
+          <!-- Liên kết đến trang lịch sử -->
+          <NuxtLink 
+            to="/history"
+            class="p-2 text-white hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition flex items-center gap-1"
+            title="Lịch Sử Xem"
+          >
+            <Icon name="heroicons-solid:clock" class="w-5 h-5" />
+          </NuxtLink>
+
           <!-- TÌM KIẾM: Input tìm kiếm phim -->
           <!-- Chỉ tìm kiếm khi bấm Enter để tối ưu -->
           <div class="flex items-center bg-gray-900 hover:bg-gray-800 border border-emerald-600/50 px-3 py-2 rounded-full text-sm text-white transition w-56 flex-shrink-0">
@@ -152,6 +172,7 @@
     <!-- flex-grow = chiếm tất cả khoảng trắng còn lại giữa header và footer -->
     <!-- slot = nơi hiển thị nội dung của page cơ thể (pages/index.vue, v.v) -->
     <main class="flex-grow container mx-auto px-4 py-8">
+      <Breadcrumb />
       <slot />
     </main>
 
@@ -169,7 +190,7 @@
             <!-- LOGO + TÊN: Giống như header -->
             <div class="flex items-center gap-2 text-xl font-bold text-emerald-500 mb-4">
               <!-- Icon phim: giống như header -->
-              <Icon name="heroicons:film-solid" class="w-6 h-6" />
+              <Icon name="heroicons-solid:film" class="w-6 h-6" />
               <!-- Tên: KHANLIX -->
               KHANLIX
             </div>
@@ -251,17 +272,17 @@
             <!-- Icon Globe: link đến website chính hoặc social media -->
             <a href="#" class="text-gray-400 hover:text-emerald-400 transition">
               <!-- Icon hình quả cầu biểu tượng: "Thế giới" hoặc "Website" -->
-              <Icon name="heroicons:globe-alt-solid" class="w-5 h-5" />
+              <Icon name="heroicons-solid:globe-alt" class="w-5 h-5" />
             </a>
             <!-- Icon Envelope: link đến email hoặc contact form -->
             <a href="#" class="text-gray-400 hover:text-emerald-400 transition">
               <!-- Icon hình phong bì: "Email" hoặc "Liên hệ" -->
-              <Icon name="heroicons:envelope-solid" class="w-5 h-5" />
+              <Icon name="heroicons-solid:envelope" class="w-5 h-5" />
             </a>
             <!-- Icon Bell: link đến thông báo hoặc notification center -->
             <a href="#" class="text-gray-400 hover:text-emerald-400 transition">
               <!-- Icon hình chuông: "Thông báo" hoặc "Tin tức mới" -->
-              <Icon name="heroicons:bell-solid" class="w-5 h-5" />
+              <Icon name="heroicons-solid:bell" class="w-5 h-5" />
             </a>
           </div>
         </div>
@@ -280,60 +301,21 @@
 
 
 
-<script setup>
-// ===== KHAI BÁO BIẾN TRẠNG THÁI (REACTIVE VARIABLES) =====
+<script setup lang="ts">
+// ========== IMPORT COMPOSABLE ==========
+import { useHeader } from '~/composables/useHeader'
 
-// showAuthModal: kiểm soát việc hiển thị/ẩn modal auth
-// ref(false) = giá trị khởi tạo là false (modal đóng)
-// Sử dụng ref() vì chỉ cần một giá trị boolean đơn giản
-const showAuthModal = ref(false)
-
-// authMode: lưu trữ chế độ hiện tại của modal ('login' hoặc 'register')
-// ref('login') = khởi tạo là 'login' mode
-// Thay đổi giá trị khi người dùng click nút "Đăng Nhập" hoặc "Đăng Ký"
-const authMode = ref('login')
-
-// showCategoryDropdown: kiểm soát việc hiển thị/ẩn dropdown danh mục
-// ref(false) = khởi tạo là false (dropdown đóng)
-// Mở/Đóng khi @mouseenter/@mouseleave trên dropdown section
-const showCategoryDropdown = ref(false)
-
-// searchInput: lưu từ khóa tìm kiếm tạm thời
-// Chỉ update route.query khi user bấm Enter
-const searchInput = ref('')
-
-// ===== CÁC HÀM XỬ LÝ (FUNCTIONS) =====
-
-// openAuthModal(mode): mở modal auth với chế độ cụ thể
-// Tham số mode: 'login' hoặc 'register'
-// Khi người dùng click "Đăng Nhập" → openAuthModal('login')
-// Khi người dùng click "Đăng Ký" → openAuthModal('register')
-const openAuthModal = (mode) => {
-  // Cập nhật authMode để AuthModal biết chế độ nào hiển thị
-  authMode.value = mode
-  // Mở modal (showAuthModal = true)
-  showAuthModal.value = true
-}
-
-// handleSearch(): xử lý tìm kiếm khi user bấm Enter
-// Cập nhật route.query với giá trị tìm kiếm hiện tại
-const handleSearch = () => {
-  useRouter().push({ query: { search: searchInput.value } })
-}
-
-// watch: theo dõi route.query.search để cập nhật searchInput từ URL
-// Khi user vào từ URL với search param, cập nhật input value
-watch(() => useRoute().query.search, (newVal) => {
-  searchInput.value = newVal || ''
-})
-
-// goHome(): quay lại trang chủ và xóa tất cả filter/search
-// Được gọi khi click vào logo hoặc nút "Trang chủ"
-// Xóa tất cả query params để trigger reset filter trong index.vue
-const goHome = () => {
-  searchInput.value = ''
-  useRouter().push({ path: '/', query: {} })  // Xóa tất cả query params
-}
+// ========== USE HEADER COMPOSABLE ==========
+// Quản lý tất cả state và logic của header
+const {
+  showAuthModal,
+  authMode,
+  openAuthModal,
+  showCategoryDropdown,
+  searchInput,
+  handleSearch,
+  goHome
+} = useHeader()
 </script>
 
 

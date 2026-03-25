@@ -8,8 +8,9 @@ import { ref, computed } from 'vue'
 
 export function useMovieFilter(allMovies: any) {
   // ========== QUẢN LÝ TRẠNG THÁI ==========
-  const activeGenreFilter = ref<string | null>(null)
-  const activeYearFilter = ref<string | null>(null)
+  // Sử dụng Set để lưu nhiều tiêu chí lọc
+  const activeGenreFilters = ref<Set<string>>(new Set())
+  const activeYearFilters = ref<Set<string>>(new Set())
   const filterCurrentPage = ref(1)
 
   // ========== GETTERS (COMPUTED) ==========
@@ -35,20 +36,23 @@ export function useMovieFilter(allMovies: any) {
     return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a))
   })
 
-  // Phim đã được lọc dựa vào activeGenreFilter và activeYearFilter
+  // Phim đã được lọc dựa vào activeGenreFilters và activeYearFilters
   const filteredMovies = computed(() => {
     if (!allMovies.value) return []
 
     return allMovies.value.filter((movie: any) => {
-      // Nếu chọn thể loại, phim phải chứa thể loại đó
-      if (activeGenreFilter.value) {
-        const hasGenre = movie.genre.includes(activeGenreFilter.value)
+      // Nếu chọn thể loại, phim phải chứa ít nhất 1 thể loại đã chọn
+      if (activeGenreFilters.value.size > 0) {
+        const hasGenre = Array.from(activeGenreFilters.value).some(
+          genre => movie.genre.includes(genre)
+        )
         if (!hasGenre) return false
       }
 
-      // Nếu chọn năm, phim phải phát hành năm đó
-      if (activeYearFilter.value) {
-        if (movie.year !== activeYearFilter.value) return false
+      // Nếu chọn năm, phim phải phát hành trong 1 năm đã chọn
+      if (activeYearFilters.value.size > 0) {
+        const hasYear = activeYearFilters.value.has(movie.year)
+        if (!hasYear) return false
       }
 
       return true
@@ -70,19 +74,31 @@ export function useMovieFilter(allMovies: any) {
 
   // Kiểm tra xem đang ở chế độ lọc hay chế độ danh mục
   const isFilterMode = computed(() => {
-    return activeGenreFilter.value !== null || activeYearFilter.value !== null
+    return activeGenreFilters.value.size > 0 || activeYearFilters.value.size > 0
   })
 
   // ========== CÁC HÀM XỬ LÝ ===========
-  const filterByGenre = (genre: string | null) => {
-    activeGenreFilter.value = genre
-    activeYearFilter.value = null
+  // Toggle thể loại (bấm lại để bỏ)
+  const filterByGenre = (genre: string) => {
+    const newSet = new Set(activeGenreFilters.value)
+    if (newSet.has(genre)) {
+      newSet.delete(genre)
+    } else {
+      newSet.add(genre)
+    }
+    activeGenreFilters.value = newSet
     filterCurrentPage.value = 1
   }
 
-  const filterByYear = (year: string | null) => {
-    activeYearFilter.value = year
-    activeGenreFilter.value = null
+  // Toggle năm (bấm lại để bỏ)
+  const filterByYear = (year: string) => {
+    const newSet = new Set(activeYearFilters.value)
+    if (newSet.has(year)) {
+      newSet.delete(year)
+    } else {
+      newSet.add(year)
+    }
+    activeYearFilters.value = newSet
     filterCurrentPage.value = 1
   }
 
@@ -93,15 +109,15 @@ export function useMovieFilter(allMovies: any) {
   }
 
   const resetFilter = () => {
-    activeGenreFilter.value = null
-    activeYearFilter.value = null
+    activeGenreFilters.value = new Set()
+    activeYearFilters.value = new Set()
     filterCurrentPage.value = 1
   }
 
   return {
     // State
-    activeGenreFilter,
-    activeYearFilter,
+    activeGenreFilters,
+    activeYearFilters,
     filterCurrentPage,
     // Getters
     allGenres,
