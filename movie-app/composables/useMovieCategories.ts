@@ -1,22 +1,39 @@
 /**
  * useMovieCategories Composable
- * Quản lý logic hiển thị các danh mục phim (New, Hot, MostViewed, Trending, Today)
- * Hỗ trợ 50 phim: 10 phim/danh mục × 5 danh mục
- * Phù hợp với Chương 5.3: Custom Composables
+ * ========================================
+ * Chức năng: Quản lý các danh mục phim (5 danh mục, 10 phim mỗi danh mục)
+ * 
+ * Cách chia dữ liệu:
+ * Cả 50 phim được chia thành 5 danh mục:
+ * 1. Danh mục 1 (Phim Mới Cập Nhật):      phim id 1-10
+ * 2. Danh mục 2 (Phim Kinh Điển):         phim id 11-20
+ * 3. Danh mục 3 (Phim Kinh Điển II):      phim id 21-30
+ * 4. Danh mục 4 (Trending):               phim id 31-40
+ * 5. Danh mục 5 (Phim Lẻ Mới Ra Mắt):     phim id 41-50
+ * 
+ * Mỗi danh mục có phân trang:
+ * - 10 phim/danh mục ÷ 5 phim/trang = 2 trang/danh mục
+ * 
+ * Tại sao chia như vậy:
+ * - Dễ dàng hiển thị nhiều thể loại phim
+ * - Người dùng có thể chọn danh mục quan tâm
+ * - Mỗi danh mục có phân trang riêng (không bị ảnh hưởng lẫn nhau)
  */
 
 import { ref, computed } from 'vue'
 
 export function useMovieCategories(allMovies: any) {
-  const moviesPerPage = 5
-
-  // ========== QUẢN LÝ TRẠNG THÁI ==========
+  const moviesPerPage = 5  // Mỗi trang hiển thị 5 phim
+  
+  // ========== QUẢN LÝ TRẠNG THÁI DANH MỤC ==========
+  // Định nghĩa 5 danh mục với vị trí trong mảng allMovies
+  // Ví dụ: new danh mục từ phim id 0 đến 9 (10 phim)
   const categories = {
     new: {
       name: 'Phim Mới Cập Nhật',
-      startIndex: 0,
-      endIndex: 10,
-      currentPage: ref(1)
+      startIndex: 0,    // Bắt đầu từ vị trí 0
+      endIndex: 10,     // Kết thúc tại vị trí 10 (10 phim: 0-9)
+      currentPage: ref(1)  // Trang hiện tại của danh mục này
     },
     hot: {
       name: 'Phim Kinh Điển',
@@ -45,34 +62,44 @@ export function useMovieCategories(allMovies: any) {
   }
 
   // ========== CÁC HÀM PHỤ TRỢ ==========
-  // Lấy danh sách phim đã phân trang cho một danh mục
+  
+  // 1. Lấy phim đã phân trang của một danh mục
+  // Ví dụ: danh mục "Phim Mới" có 10 phim, lấy 5 phim trang 1
   const getPaginatedMovies = (startIndex: number, currentPage: number) => {
     if (!allMovies.value || allMovies.value.length === 0) return []
+    
+    // Lấy 10 phim của danh mục này
     const categoryMovies = allMovies.value.slice(startIndex, startIndex + 10)
+    
+    // Phân trang: trang 1 = phim 0-4, trang 2 = phim 5-9
     const start = (currentPage - 1) * moviesPerPage
     const end = start + moviesPerPage
     return categoryMovies.slice(start, end)
   }
 
-  // Tính tổng số trang của một danh mục
+  // 2. Tính tổng số trang của một danh mục
+  // 10 phim ÷ 5 phim/trang = 2 trang
   const getTotalPages = () => {
     if (!allMovies.value || allMovies.value.length === 0) return 0
-    return Math.ceil(10 / moviesPerPage)
+    return Math.ceil(10 / moviesPerPage)  // 10 phim/danh mục
   }
 
-  // ========== GETTERS - NEW CATEGORY ==========
+  // ========== GETTERS CHO MỖI DANH MỤC ==========
+  // Mỗi danh mục có 3 computed: danh sách phim, tổng trang, và hàm chuyển trang
+  
+  // DANH MỤC 1 - Phim Mới Cập Nhật
   const newMoviesPaginated = computed(() => {
     return getPaginatedMovies(categories.new.startIndex, categories.new.currentPage.value)
   })
   const totalPagesNew = computed(() => getTotalPages())
 
-  // ========== GETTERS - HOT CATEGORY ==========
+  // DANH MỤC 2 - Phim Kinh Điển
   const hotMoviesPaginated = computed(() => {
     return getPaginatedMovies(categories.hot.startIndex, categories.hot.currentPage.value)
   })
   const totalPagesHot = computed(() => getTotalPages())
 
-  // ========== GETTERS - MOST VIEWED CATEGORY ==========
+  // DANH MỤC 3 - Phim Kinh Điển II
   const mostViewedPaginated = computed(() => {
     return getPaginatedMovies(
       categories.mostViewed.startIndex,
@@ -81,19 +108,22 @@ export function useMovieCategories(allMovies: any) {
   })
   const totalPagesMostViewed = computed(() => getTotalPages())
 
-  // ========== GETTERS - TRENDING CATEGORY ==========
+  // DANH MỤC 4 - Trending
   const trendingPaginated = computed(() => {
     return getPaginatedMovies(categories.trending.startIndex, categories.trending.currentPage.value)
   })
   const totalPagesTrending = computed(() => getTotalPages())
 
-  // ========== GETTERS - TODAY CATEGORY ==========
+  // DANH MỤC 5 - Phim Lẻ Mới Ra Mắt
   const todayPaginated = computed(() => {
     return getPaginatedMovies(categories.today.startIndex, categories.today.currentPage.value)
   })
   const totalPagesToday = computed(() => getTotalPages())
 
-  // ========== ACTIONS - PAGINATION FOR EACH CATEGORY ==========
+  // ========== PHƯƠNG THỨC CHUYỂN TRANG ==========
+  // Mỗi danh mục có hàm riêng để chuyển trang
+  // Ví dụ: goToPageNew(2) → chuyển danh mục "Phim Mới" sang trang 2
+  
   const goToPageNew = (pageNumber: number) => {
     if (pageNumber >= 1 && pageNumber <= totalPagesNew.value) {
       categories.new.currentPage.value = pageNumber
@@ -124,25 +154,32 @@ export function useMovieCategories(allMovies: any) {
     }
   }
 
+  // ========== EXPORT CÁC GIOCKTÓC VÀ PHƯƠNG THỨC ==========
   return {
-    // State
+    // Danh sách danh mục (chứa name, startIndex, endIndex, currentPage)
     categories,
-    // Getters - New
+    
+    // Danh mục 1: Phim Mới Cập Nhật
     newMoviesPaginated,
     totalPagesNew,
-    // Getters - Hot
+    
+    // Danh mục 2: Phim Kinh Điển
     hotMoviesPaginated,
     totalPagesHot,
-    // Getters - Most Viewed
+    
+    // Danh mục 3: Phim Kinh Điển II
     mostViewedPaginated,
     totalPagesMostViewed,
-    // Getters - Trending
+    
+    // Danh mục 4: Trending Hôm Nay
     trendingPaginated,
     totalPagesTrending,
-    // Getters - Today
+    
+    // Danh mục 5: Phim Lẻ Mới Ra Mắt
     todayPaginated,
     totalPagesToday,
-    // Actions
+    
+    // Các phương thức chuyển trang cho mỗi danh mục
     goToPageNew,
     goToPageHot,
     goToPageMostViewed,

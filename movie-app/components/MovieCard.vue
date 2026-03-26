@@ -2,40 +2,46 @@
 import { computed } from 'vue'
 import { useMovieStore } from '~/stores/movieStore'
 
-// Nhận dữ liệu từ component cha (parent)
+// ========== NHẬN DỮ LIỆU TỪ COMPONENT CHA ==========
+// Movie object chứa thông tin: id, title, poster, year, genre, rating
 const props = defineProps({
   movie: {
     type: Object as () => any,
     required: true
-    // movie chứa: id, title, poster, year, genre, rating
   }
 })
 
-// ========== MOVIE STORE ==========
+// ========== QUẢN LÝ STATE ==========
+// Kết nối với Pinia store để quản lý danh sách yêu thích
 const movieStore = useMovieStore()
 
-// ========== STATE ==========
-// Kiểm tra xem phim có phải favorite không
+// Kiểm tra xem phim hiện tại có phải yêu thích không
+// computed: tự động cập nhật khi movieStore.favorites thay đổi
 const isFavorited = computed(() => {
   return movieStore.isFavorited(props.movie.id)
 })
 
-// ========== METHODS ==========
-// toggleFavorite: Thêm/xóa khỏi yêu thích
-// Ngăn event bubble (không navigate khi click heart)
+// ========== PHƯƠNG THỨC XỬ LÝ ==========
+
+// toggleFavorite: Thêm/xóa phim khỏi danh sách yêu thích
+// Tham số e: sự kiện click (dùng để ngăn không navigate khi click heart)
 const toggleFavorite = async (e: Event) => {
+  // e.preventDefault(): Ngăn hành động mặc định (navigate)
   e.preventDefault()
+  // e.stopPropagation(): Ngăn sự kiện lan truyền lên element cha
   e.stopPropagation()
   
+  // Gọi phương thức từ store để thêm/xóa yêu thích
   await movieStore.toggleFavorite(props.movie.id)
 }
 </script>
 
 <template>
+  <!-- NuxtLink: tạo link đến trang chi tiết phim (/movies/{id}) -->
   <NuxtLink :to="`/movies/${props.movie.id}`" class="group cursor-pointer">
-    <!-- Thẻ phim (poster) -->
+    <!-- ===== THẺ PHIM (POSTER) ===== -->
     <div class="relative aspect-[2/3] overflow-hidden rounded-lg bg-gray-800 shadow-lg hover:shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 transform hover:scale-105">
-      <!-- Ảnh phim (NuxtImg với lazy loading) -->
+      <!-- Ảnh poster với lazy loading (NuxtImg tự động tối ưu hóa) -->
       <NuxtImg 
         :src="props.movie.poster" 
         :alt="props.movie.title"
@@ -43,16 +49,19 @@ const toggleFavorite = async (e: Event) => {
         class="w-full h-full object-cover"
       />
 
-      <!-- Hiệu ứng phủ khi di chuột vào (hover) -->
+      <!-- ===== HIỆU ỨNG KÍNH (OVERLAY) KHI DI CHUỘT =====-->
+      <!-- Hiển thị khi người dùng di chuột vào card (group-hover) -->
       <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3">
-        <!-- Top: Đánh giá sao + Nút Yêu Thích -->
+        
+        <!-- TOP: Đánh giá sao + Nút Yêu Thích -->
         <div class="flex justify-between items-start">
+          <!-- Hộp đánh giá: hiển thị số sao -->
           <div class="flex items-center gap-1 bg-emerald-600 text-white text-xs font-bold px-2 py-1 rounded-full">
             <Icon name="heroicons-solid:star" class="w-4 h-4 text-emerald-300" />
             {{ props.movie.rating }}
           </div>
           
-          <!-- Nút Yêu Thích -->
+          <!-- Nút Yêu Thích: thay đổi màu sắc nếu yêu thích -->
           <button
             @click="toggleFavorite"
             :class="[
@@ -63,6 +72,7 @@ const toggleFavorite = async (e: Event) => {
             ]"
             :title="isFavorited ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'"
           >
+            <!-- Icon trái tim: đầy đủ nếu yêu thích, rỗng nếu chưa -->
             <Icon 
               :name="isFavorited ? 'heroicons-solid:heart' : 'heroicons:heart'"
               class="w-5 h-5"
@@ -70,11 +80,13 @@ const toggleFavorite = async (e: Event) => {
           </button>
         </div>
 
-        <!-- Tên phim + Năm + Thể loại -->
+        <!-- BOTTOM: Tên phim + Năm + Thể loại -->
         <div>
+          <!-- Tên phim (có ellipsis nếu quá dài) -->
           <h3 class="font-bold text-sm text-white line-clamp-2 mb-1">
             {{ props.movie.title }}
           </h3>
+          <!-- Năm phát hành + Thể loại -->
           <p class="text-xs text-emerald-400">
             {{ props.movie.year }} • {{ props.movie.genre }}
           </p>
