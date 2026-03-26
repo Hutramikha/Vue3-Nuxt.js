@@ -4,7 +4,7 @@
 // Hỗ trợ lọc phía server: ?genre=Hành động&year=2024&search=phim
 import { defineEventHandler, getQuery } from 'h3'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   // ========== DANH SÁCH TẤT CẢ PHIM ==========
   const allMovies = [
     // ===== DANH MỤC 1: PHIM MỚI CẬP NHẬT (10 PHIM) =====

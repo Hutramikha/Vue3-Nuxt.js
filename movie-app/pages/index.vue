@@ -30,23 +30,31 @@ import { useMovieCategories } from '~/composables/useMovieCategories'
 // PHẦN 1: LẤY DỮ LIỆU PHIM TỪ API
 // ============================================
 // allMovies: danh sách 50 phim lấy từ server (API endpoint: /api/movies)
-// isLoading: hiển thị loading spinner trong khi tải dữ liệu
-const isLoading = ref(true)
+// pending: hiển thị loading spinner trong khi tải dữ liệu
 const { addError } = useErrorHandler()
-
 const allMovies = ref<any[]>([])
-try {
-  // useFetch: hàm Nuxt tự động xử lý SSR + client-side fetching
-  const { data, error } = await useFetch('/api/movies')
-  if (error.value || !data.value) {
-    addError('Lỗi tải danh sách phim. Vui lòng làm mới trang.')
-  } else {
-    allMovies.value = data.value  // Gán 50 phim vào state
+const isLoading = ref(true)
+
+// Fetch dữ liệu phim từ API
+const { data, error, pending, refresh } = await useFetch('/api/movies')
+
+// Gán dữ liệu và setup watchers
+watch(data, (newData) => {
+  if (newData && Array.isArray(newData)) {
+    allMovies.value = newData
   }
-} catch (err: any) {
-  addError(err.message || 'Lỗi khi tải dữ liệu từ server')
-}
-isLoading.value = false  // Tắt loading spinner
+}, { immediate: true })
+
+watch(pending, (newPending) => {
+  isLoading.value = newPending
+}, { immediate: true })
+
+watch(error, (newError) => {
+  if (newError) {
+    console.error('API Error:', newError)
+    addError('Lỗi tải danh sách phim. Vui lòng làm mới trang.')
+  }
+})
 
 // ============================================
 // PHẦN 2: KHAI BÁO COMPOSABLES
