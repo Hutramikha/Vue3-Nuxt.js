@@ -17,9 +17,14 @@
 // ============================================
 // IMPORT COMPOSABLES & UTILITIES
 // ============================================
+import { ref, watch, computed } from 'vue'
 import { useCarousel } from '~/composables/useCarousel'
 import { useNavigation } from '~/composables/useNavigation'
 import { useErrorHandler } from '~/composables/useError'
+import { useMovieFilter } from '~/composables/useMovieFilter'
+import { useMovieSearch } from '~/composables/useMovieSearch'
+import { useMovieTypeFilter } from '~/composables/useMovieTypeFilter'
+import { useMovieCategories } from '~/composables/useMovieCategories'
 
 // ============================================
 // PHẦN 1: LẤY DỮ LIỆU PHIM TỪ API
@@ -79,6 +84,20 @@ const {
   totalSearchPages, 
   isSearchMode 
 } = useMovieSearch(allMovies)
+
+// useMovieTypeFilter: quản lý lọc phim theo loại (lẻ/bộ)
+// - typeFilter: loại phim (single/series) từ URL (?type=...)
+// - filteredByTypeMoviesPaginated: danh sách phim theo loại
+// - isTypeFilterMode: boolean - đang ở chế độ lọc loại não không
+const {
+  typeFilter,
+  filteredByTypeMovies,
+  typeFilterCurrentPage,
+  filteredByTypeMoviesPaginated,
+  totalTypeFilterPages,
+  isTypeFilterMode,
+  typeFilterLabel
+} = useMovieTypeFilter(allMovies)
 
 // useMovieCategories: quản lý 5 danh mục phim
 // Chia 50 phim thành 5 danh mục, mỗi danh mục 10 phim, phân trang mỗi danh mục
@@ -242,6 +261,21 @@ const goToSearchPage = async (pageNumber: number) => {
       query: {
         search: searchQuery.value,
         searchPage: pageNumber
+      }
+    })
+  }
+}
+
+// goToTypeFilterPage(pageNumber): chuyển tới trang khi lọc theo loại phim
+// Khi user click vào nút số trang khi đang xem kết quả lọc loại phim
+const goToTypeFilterPage = async (pageNumber: number) => {
+  const router = useRouter()
+  // Kiểm tra pageNumber hợp lệ
+  if (pageNumber >= 1 && pageNumber <= totalTypeFilterPages.value) {
+    await router.push({
+      query: {
+        type: typeFilter.value,
+        typeFilterPage: pageNumber
       }
     })
   }
@@ -425,6 +459,83 @@ const toggleFilter = () => {
         <p class="text-gray-500 text-center max-w-md">
           Rất tiếc, chúng tôi không tìm thấy phim phù hợp với từ khóa "<span class="text-emerald-400 font-semibold">{{ searchQuery }}</span>". 
           Vui lòng thử tìm kiếm với từ khóa khác.
+        </p>
+      </div>
+    </div>
+
+    <!-- ===== KẾT QUẢ LỌC THEO LOẠI PHIM (LẺ/BỘ) ===== -->
+    <!-- v-if="isTypeFilterMode": Chỉ hiển thị khi người dùng bấm Phim Lẻ hoặc Phim Bộ -->
+    <div v-if="isTypeFilterMode" class="mb-24">
+      <!-- ===== TIÊU ĐỀ KẾT QUẢ LỌC LOẠI PHIM ===== -->
+      <!-- Hiển thị loại phim đã chọn và số phim tìm được -->
+      <div class="mb-10 p-6 rounded-lg bg-gradient-to-r from-emerald-600/20 to-blue-600/20 border border-emerald-600/30">
+        <h2 class="text-3xl font-bold text-white mb-2">
+          {{ typeFilterLabel }}
+          <!-- filteredByTypeMovies.length: tổng số phim theo loại -->
+          <span class="text-emerald-400 text-lg">({{ filteredByTypeMovies.length }} phim)</span>
+        </h2>
+        <!-- Mô tả loại phim -->
+        <p class="text-gray-400 text-sm" v-if="typeFilter === 'single'">Hiển thị tất cả phim lẻ (single movies)</p>
+        <p class="text-gray-400 text-sm" v-else>Hiển thị tất cả phim bộ (series/TV shows)</p>
+      </div>
+      
+      <!-- ===== HIỂN THỊ PHIM THEO LOẠI HOẶC THÔNG BÁO "KHÔNG TÌM THẤY" ===== -->
+      <!-- template v-if: kiểm tra có phim theo loại không -->
+      <template v-if="filteredByTypeMovies.length > 0">
+        <!-- ===== GRID PHIM THEO LOẠI ===== -->
+        <!-- filteredByTypeMoviesPaginated: danh sách phim hiển thị trên page hiện tại
+             - mobile: 1 phim/hàng
+             - tablet: 2 phim/hàng
+             - desktop: 4 phim/hàng -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <MovieCard v-for="movie in filteredByTypeMoviesPaginated" :key="movie.id" :movie="movie" />
+        </div>
+        
+        <!-- ===== PHÂN TRANG KẾT QUẢ LỌC LOẠI ===== -->
+        <!-- v-if="totalTypeFilterPages > 1": Chỉ hiển thị nếu > 1 trang -->
+        <div v-if="totalTypeFilterPages > 1" class="flex justify-center items-center gap-2">
+          <!-- NÚT TRƯỚC -->
+          <button 
+            @click="goToTypeFilterPage(1)"
+            :disabled="totalTypeFilterPages === 1"
+            class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            ← Trước
+          </button>
+          
+          <!-- CÁC NÚT TRANG -->
+          <div class="flex gap-1">
+            <button 
+              v-for="page in totalTypeFilterPages" 
+              :key="page"
+              @click="goToTypeFilterPage(page)"
+              :class="page === typeFilterCurrentPage ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
+              class="px-3 py-1 text-sm rounded font-semibold transition"
+            >
+              {{ page }}
+            </button>
+          </div>
+          
+          <!-- NÚT SAU -->
+          <button 
+            @click="goToTypeFilterPage(totalTypeFilterPages)"
+            :disabled="totalTypeFilterPages === 1"
+            class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            Sau →
+          </button>
+        </div>
+      </template>
+      
+      <!-- ===== THÔNG BÁO KHÔNG TÌM THẤY PHIM THEO LOẠI ===== -->
+      <!-- v-else: hiển thị khi filteredByTypeMovies.length === 0 -->
+      <div v-else class="flex flex-col items-center justify-center py-20">
+        <!-- Icon phim với opacity nhạt -->
+        <Icon name="heroicons-solid:film" class="w-20 h-20 text-gray-600 mb-4" />
+        <h3 class="text-2xl font-bold text-gray-400 mb-2">Không Tìm Thấy Phim</h3>
+        <p class="text-gray-500 text-center max-w-md">
+          Rất tiếc, chúng tôi hiện không có <span class="text-emerald-400 font-semibold">{{ typeFilterLabel }}</span>. 
+          Vui lòng kiểm tra lại sau hoặc chọn loại phim khác.
         </p>
       </div>
     </div>

@@ -2,6 +2,8 @@
 // Tổng 50 phim: 10 phim × 5 danh mục = 50 phim
 // Mỗi danh mục có phân trang: 5 phim/trang × 2 trang = 10 phim/danh mục
 // Hỗ trợ lọc phía server: ?genre=Hành động&year=2024&search=phim
+import { defineEventHandler, getQuery } from 'h3'
+
 export default defineEventHandler((event) => {
   // ========== DANH SÁCH TẤT CẢ PHIM ==========
   const allMovies = [
@@ -65,13 +67,22 @@ export default defineEventHandler((event) => {
     { id: 50, title: "Everything Everywhere All at Once", poster: "/images/posters/everything.jpg", year: "2022", genre: "Viễn Tưởng, Chính Kịch", rating: 8.0, synopsis: "Một phụ nữ khối phòng bị cuốn vào một cuộc phiêu lưu đa vũ trụ để cứu cô ấy gia đình.", trailerUrl: "https://www.youtube.com/embed/wtDMW7-8MeE" }
   ]
 
+  // ========== THÊM FIELD TYPE (PHIM LẺ/BỘ) ==========
+  // Thêm type field cho mỗi phim dựa vào ID
+  // - ID 1-25: type = 'single' (phim lẻ)
+  // - ID 26-50: type = 'series' (phim bộ)
+  const moviesWithType = allMovies.map((movie: any) => ({
+    ...movie,
+    type: movie.id <= 25 ? 'single' : 'series'
+  }))
+
   // ========== LOGIC FILTER SERVER-SIDE ==========
   const query = getQuery(event)
   const genre = query.genre as string
   const year = query.year as string
   const search = query.search as string
 
-  let filteredMovies = [...allMovies]
+  let filteredMovies = [...moviesWithType]
 
   // Filter theo thể loại
   if (genre) {

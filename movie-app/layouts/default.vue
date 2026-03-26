@@ -22,10 +22,20 @@
             <li>
               <NuxtLink to="/" @click="goHome" class="hover:text-emerald-500 transition">Trang chủ</NuxtLink>
             </li>
-            <!-- Link Phim Lẻ: để xem các bộ phim đơn (chưa có page này) -->
-            <li><NuxtLink to="#" class="hover:text-emerald-500 transition">Phim Lẻ</NuxtLink></li>
-            <!-- Link Phim Bộ: để xem các series/phim tập (chưa có page này) -->
-            <li><NuxtLink to="#" class="hover:text-emerald-500 transition">Phim Bộ</NuxtLink></li>
+            <!-- Nút Phim Lẻ: lọc phim theo loại single movies -->
+            <li>
+              <button 
+                @click="filterBySingleMovies"
+                class="hover:text-emerald-500 transition cursor-pointer"
+              >Phim Lẻ</button>
+            </li>
+            <!-- Nút Phim Bộ: lọc phim theo loại series movies -->
+            <li>
+              <button 
+                @click="filterBySeriesMovies"
+                class="hover:text-emerald-500 transition cursor-pointer"
+              >Phim Bộ</button>
+            </li>
           </ul>
 
           <!-- PHẦN 3: DROPDOWN DANH MỤC -->
@@ -57,12 +67,12 @@
                     <!-- Danh sách các thể loại: mỗi link là một thể loại riêng -->
                     <div class="space-y-2">
                       <!-- Link thể loại: khi click sẽ lọc phim theo thể loại này -->
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Hành động</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Hài hước</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Kinh dị</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Lãng mạn</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Khoa học viễn tưởng</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Tâm lý</NuxtLink>
+                      <button @click="filterByGenre('Hành Động')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Hành động</button>
+                      <button @click="filterByGenre('Hài')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Hài hước</button>
+                      <button @click="filterByGenre('Kinh Dị')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Kinh dị</button>
+                      <button @click="filterByGenre('Tâm Lý')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Lãng mạn</button>
+                      <button @click="filterByGenre('Viễn Tưởng')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Khoa học viễn tưởng</button>
+                      <button @click="filterByGenre('Chính Kịch')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Chính kịch</button>
                     </div>
                   </div>
 
@@ -74,12 +84,12 @@
                     <!-- Danh sách các năm: từ mới nhất đến cũ nhất -->
                     <div class="space-y-2">
                       <!-- Link năm: khi click sẽ lọc phim phát hành trong năm đó -->
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">2026</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">2025</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">2024</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">2023</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">2022</NuxtLink>
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">2021</NuxtLink>
+                      <button @click="filterByYear('2026')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">2026</button>
+                      <button @click="filterByYear('2025')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">2025</button>
+                      <button @click="filterByYear('2024')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">2024</button>
+                      <button @click="filterByYear('2023')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">2023</button>
+                      <button @click="filterByYear('2022')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">2022</button>
+                      <button @click="filterByYear('2021')" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">2021</button>
                     </div>
                   </div>
 
@@ -91,15 +101,15 @@
                     <!-- Danh sách các bộ lọc đặc biệt -->
                     <div class="space-y-2">
                       <!-- Link bộ lọc: khi click sẽ hiển thị phim được xếp hạng cao nhất -->
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Top Phim</NuxtLink>
+                      <button @click="filterByRating" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Top Phim</button>
                       <!-- Link bộ lọc: khi click sẽ hiển thị phim được phát hành gần đây -->
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Phim Mới Nhất</NuxtLink>
+                      <button @click="filterByNew" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Phim Mới Nhất</button>
                       <!-- Link bộ lọc: khi click sẽ hiển thị phim được xem nhiều nhất -->
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Xem Nhiều Nhất</NuxtLink>
+                      <button @click="filterByViewed" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Xem Nhiều Nhất</button>
                       <!-- Link bộ lọc: khi click sẽ hiển thị phim có rating cao nhất (IMDb, v.v) -->
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Được Đánh Giá Cao</NuxtLink>
-                      <!-- Link bộ lọc: khi click sẽ hiển thị phim sắp phát hành -->
-                      <NuxtLink to="#" class="block text-sm text-gray-300 hover:text-emerald-400 transition">Sắp Ra Mắt</NuxtLink>
+                      <button @click="filterByRating" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Được Đánh Giá Cao</button>
+                      <!-- Link bộ lọc: xóa tất cả filter -->
+                      <button @click="clearFilters" class="block text-sm text-gray-300 hover:text-emerald-400 transition w-full text-left">Xóa Bộ Lọc</button>
                     </div>
                   </div>
                 </div>
@@ -120,15 +130,15 @@
             <Icon name="heroicons-solid:heart" class="w-5 h-5 text-white" />
           </NuxtLink>
 
-          <!-- NÚT LỊCH SỬ XEM -->
-          <!-- Liên kết đến trang lịch sử -->
-          <NuxtLink 
-            to="/history"
-            class="p-2 text-white hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition flex items-center gap-1"
-            title="Lịch Sử Xem"
+          <!-- NÚT LỊCH SỬ XEM (CHỈ UI DECORATION) -->
+          <!-- Nút này chỉ dùng để UI, không có chức năng thực -->
+          <button 
+            disabled
+            class="p-2 text-gray-500 cursor-not-allowed rounded-lg transition flex items-center gap-1"
+            title="Lịch Sử Xem (Đang phát triển)"
           >
             <Icon name="heroicons-solid:clock" class="w-5 h-5" />
-          </NuxtLink>
+          </button>
 
           <!-- TÌM KIẾM: Input tìm kiếm phim -->
           <!-- Chỉ tìm kiếm khi bấm Enter để tối ưu -->
@@ -314,7 +324,15 @@ const {
   showCategoryDropdown,
   searchInput,
   handleSearch,
-  goHome
+  goHome,
+  filterBySingleMovies,
+  filterBySeriesMovies,
+  filterByGenre,
+  filterByYear,
+  filterByRating,
+  filterByNew,
+  filterByViewed,
+  clearFilters
 } = useHeader()
 </script>
 

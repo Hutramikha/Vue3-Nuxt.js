@@ -44,7 +44,61 @@ export const useHeader = () => {
   const handleSearch = async () => {
     if (searchInput.value.trim()) {
       await router.push({ query: { search: searchInput.value } })
+      searchInput.value = ''
     }
+  }
+
+  // filterBySingleMovies(): lọc phim lẻ
+  // Khi user click nút "Phim Lẻ" trên header
+  const filterBySingleMovies = async () => {
+    await router.push({ query: { type: 'single' } })
+    showCategoryDropdown.value = false
+  }
+
+  // filterBySeriesMovies(): lọc phim bộ (series)
+  // Khi user click nút "Phim Bộ" trên header
+  const filterBySeriesMovies = async () => {
+    await router.push({ query: { type: 'series' } })
+    showCategoryDropdown.value = false
+  }
+
+  // filterByGenre(genre): lọc phim theo thể loại
+  // Khi user click vào thể loại trong dropdown danh mục
+  const filterByGenre = async (genre: string) => {
+    await router.push({ query: { genre } })
+    showCategoryDropdown.value = false
+  }
+
+  // filterByYear(year): lọc phim theo năm
+  // Khi user click vào năm trong dropdown danh mục
+  const filterByYear = async (year: string) => {
+    await router.push({ query: { year } })
+    showCategoryDropdown.value = false
+  }
+
+  // filterByRating(): lọc phim theo rating cao
+  const filterByRating = async () => {
+    await router.push({ query: { sortBy: 'rating' } })
+    showCategoryDropdown.value = false
+  }
+
+  // filterByNew(): lọc phim mới nhất
+  const filterByNew = async () => {
+    await router.push({ query: { sortBy: 'newest' } })
+    showCategoryDropdown.value = false
+  }
+
+  // filterByViewed(): lọc phim xem nhiều nhất
+  const filterByViewed = async () => {
+    await router.push({ query: { sortBy: 'viewed' } })
+    showCategoryDropdown.value = false
+  }
+
+  // clearFilters(): xóa tất cả filter
+  const clearFilters = async () => {
+    await router.push({ query: {} })
+    searchInput.value = ''
+    showCategoryDropdown.value = false
   }
 
   // toggleCategoryDropdown(): bật/tắt dropdown danh mục
@@ -59,7 +113,7 @@ export const useHeader = () => {
   // goHome(): quay lại trang chủ và xóa tất cả filter/search
   // Được gọi khi click vào logo hoặc nút "Trang chủ"
   const goHome = async () => {
-    searchInput.value = ''
+    await clearFilters()
     await navigateHome()
   }
 
@@ -97,7 +151,19 @@ export const useHeader = () => {
     searchInput,
     handleSearch,
 
+    // Movie Type Filters
+    filterBySingleMovies,
+    filterBySeriesMovies,
+
+    // Category Filters
+    filterByGenre,
+    filterByYear,
+    filterByRating,
+    filterByNew,
+    filterByViewed,
+
     // Navigation
-    goHome
+    goHome,
+    clearFilters
   }
 }

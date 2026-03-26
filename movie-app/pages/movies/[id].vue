@@ -12,7 +12,6 @@ import { useVideoPlayer } from '~/composables/useVideoPlayer'
 import { useNavigation } from '~/composables/useNavigation'
 import { useMovieStore } from '~/stores/movieStore'
 import { generateMovieMeta, generatePageTitle } from '~/utils/seo'
-import { addToWatchHistory, setMovieProgress } from '~/utils/localStorage'
 import { watch, ref, computed } from 'vue'
 
 // ========== LẤY DỮ LIỆU PHIM ==========
@@ -42,20 +41,6 @@ const toggleFavorite = async () => {
   await movieStore.toggleFavorite(movieId.value)
 }
 
-// ========== WATCHER - GHI LỮC SỬ XEM ==========
-// Side effect: Lưu trạng thái xem phim vào localStorage
-watch(
-  () => ({ id: movieId.value, time: playerState.currentTime }),
-  (newState) => {
-    if (movie.value) {
-      // Ghi nhận lịch sử xem phim và tiến độ
-      console.log(`[WATCH] Đang xem: ${newState.id}, tiến độ: ${newState.time}s`)
-      addToWatchHistory(newState.id, movie.value.title)
-      setMovieProgress(newState.id, newState.time, 5400)
-    }
-  },
-  { deep: true }
-)
 
 // ========== SEO OPTIMIZATION ==========
 // Meta tags động dựa vào thông tin phim
