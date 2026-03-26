@@ -80,6 +80,7 @@ const {
 const { 
   searchQuery, 
   searchedMovies, 
+  searchCurrentPage,
   searchedMoviesPaginated, 
   totalSearchPages, 
   isSearchMode 
@@ -307,10 +308,10 @@ const toggleFilter = () => {
     <!-- Hiển thị trong khi useFetch đang chạy, ẩn khi isLoading = false -->
     <LoadingSpinner :isVisible="isLoading" />
     
-    <!-- ===== CAROUSEL QUẢNG CÁO - Chỉ hiển thị khi không tìm kiếm ===== -->
-    <!-- v-if="!isSearchMode": ẩn carousel khi user đang tìm kiếm phim
-         Lý do: Khi tìm kiếm, tập trung vào kết quả, không cần quảng cáo -->
-    <div v-if="!isSearchMode" class="mb-24 relative overflow-hidden rounded-2xl bg-gradient-to-r shadow-2xl">
+    <!-- ===== CAROUSEL QUẢNG CÁO - Chỉ hiển thị khi không tìm kiếm và không lọc loại ===== -->
+    <!-- v-if="!isSearchMode && !isTypeFilterMode": ẩn carousel khi user đang tìm kiếm phim hoặc lọc theo loại
+         Lý do: Khi tìm kiếm/lọc, tập trung vào kết quả, không cần quảng cáo -->
+    <div v-if="!isSearchMode && !isTypeFilterMode" class="mb-24 relative overflow-hidden rounded-2xl bg-gradient-to-r shadow-2xl">
       <!-- Gradient nền thay đổi theo slide hiện tại (advertisements[currentAdIndex]?.color) -->
       <!-- transition-all duration-700: gradient thay đổi mượt trong 700ms -->
       <div v-if="advertisements[currentAdIndex]" :class="`bg-gradient-to-r ${advertisements[currentAdIndex]?.color}`" class="transition-all duration-700">
@@ -433,7 +434,9 @@ const toggleFilter = () => {
             <button 
               v-for="page in totalSearchPages" 
               :key="page"
-              class="px-3 py-1 text-sm rounded font-semibold transition bg-gray-800 text-gray-300 hover:bg-gray-700"
+              @click="goToSearchPage(page)"
+              :class="page === searchCurrentPage ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
+              class="px-3 py-1 text-sm rounded font-semibold transition"
             >
               {{ page }}
             </button>
@@ -541,8 +544,8 @@ const toggleFilter = () => {
     </div>
     
     <!-- ===== NÚT MỞ/ĐÓNG BỘ LỌC (TOGGLE FILTER) ===== -->
-    <!-- v-if=!isSearchMode: Chỉ hiển thị khi không tìm kiếm -->
-    <template v-if="!isSearchMode">
+    <!-- v-if="!isSearchMode && !isTypeFilterMode": Chỉ hiển thị khi không tìm kiếm và không lọc theo loại -->
+    <template v-if="!isSearchMode && !isTypeFilterMode">
     <div class="mb-6 flex items-center gap-2">
       <!-- NÚT TOGGLE: Thay đổi showFilter: true ↔ false -->
       <!-- :class binding: Đổi màu nút dựa trên showFilter -->
@@ -725,9 +728,9 @@ const toggleFilter = () => {
       </div>
     </div>
     
-    <!-- ===== PHẦN DANH MỤC (CHỈ HIỂN THỊ KHI ISFILTERMODE = FALSE) ===== -->
+    <!-- ===== PHẦN DANH MỤC (CHỈ HIỂN THỊ KHI KHÔNG LỌC, TÌM KIẾM, MỤC LỌC LOẠI) ===== -->
     <!-- Khi không lọc phim: hiển thị 5 danh mục với phim ưu tiên -->
-    <template v-else>
+    <template v-if="!isFilterMode && !isSearchMode && !isTypeFilterMode">
     
     <!-- ====== DANH MỤC 0: PHIM TOP TRENDING (NỔI BẬT ĐẦU TIÊN) ====== -->
     <div class="mb-24 p-6 rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-emerald-600 border-opacity-30 shadow-2xl">
