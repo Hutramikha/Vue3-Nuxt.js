@@ -428,8 +428,8 @@ const toggleFilter = () => {
         <div v-if="totalSearchPages > 1" class="flex justify-center items-center gap-2">
           <!-- NÚT TRƯỚC: Quay lại trang trước -->
           <button 
-            @click="goToSearchPage(1)"
-            :disabled="totalSearchPages === 1"
+            @click="goToSearchPage(Math.max(1, searchCurrentPage - 1))"
+            :disabled="searchCurrentPage === 1"
             class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             ← Trước
@@ -452,8 +452,8 @@ const toggleFilter = () => {
           
           <!-- NÚT SAU: Chuyển đến trang tiếp theo -->
           <button 
-            @click="goToSearchPage(totalSearchPages)"
-            :disabled="totalSearchPages === 1"
+            @click="goToSearchPage(Math.min(totalSearchPages, searchCurrentPage + 1))"
+            :disabled="searchCurrentPage === totalSearchPages"
             class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             Sau →
@@ -507,8 +507,8 @@ const toggleFilter = () => {
         <div v-if="totalTypeFilterPages > 1" class="flex justify-center items-center gap-2">
           <!-- NÚT TRƯỚC -->
           <button 
-            @click="goToTypeFilterPage(1)"
-            :disabled="totalTypeFilterPages === 1"
+            @click="goToTypeFilterPage(Math.max(1, typeFilterCurrentPage - 1))"
+            :disabled="typeFilterCurrentPage === 1"
             class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             ← Trước
@@ -529,8 +529,8 @@ const toggleFilter = () => {
           
           <!-- NÚT SAU -->
           <button 
-            @click="goToTypeFilterPage(totalTypeFilterPages)"
-            :disabled="totalTypeFilterPages === 1"
+            @click="goToTypeFilterPage(Math.min(totalTypeFilterPages, typeFilterCurrentPage + 1))"
+            :disabled="typeFilterCurrentPage === totalTypeFilterPages"
             class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             Sau →

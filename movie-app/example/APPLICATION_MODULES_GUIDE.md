@@ -731,7 +731,7 @@ interface Movie {
 
 ### 📖 Định nghĩa
 
-**SEO Optimization** là thêm meta tags (description, Open Graph), JSON-LD structured data (schema.org Movie), canonical tag, sitemap vào trang phim để Google hiểu và rank cao, đồng thời khi share link lên Facebook/Twitter nó hiển thị poster + title + description. Kết quả: organic traffic tăng, rich results ở SERP, social sharing tốt hơn.
+**SEO Optimization (Tối ưu SEO)** là quá trình nhúng dữ liệu có cấu trúc vào HTML trang phim bao gồm meta tags (description, Open Graph: og:title, og:image, og:description), JSON-LD structured data (schema.org/Movie) định dạng chuẩn giúp Google/Bing hiểu phim là gì, rating là bao nhiêu, poster là hình gì, từ đó Google sẽ hiển thị thông tin phim trực tiếp trên kết quả tìm kiếm dưới dạng rich snippets với sao đánh giá, hình ảnh poster, mô tả phim. Kết quả: trang phim được xếp hạng cao trên Google khi tìm kiếm (organic traffic tăng), hiển thị rich results trực tiếp trên SERP (Search Engine Results Page), và cải thiện structured data validation khi crawler các công cụ kiểm tra như Google Rich Results Test hoặc Schema.org Validator phân tích HTML source.
 
 ### Nội dung để viết trong báo cáo:
 
@@ -848,9 +848,24 @@ Sitemap: https://khanlix.com/sitemap.xml
 ```
 
 ### 🎬 Minh chứng thực nghiệm:
-1. **Meta Tags in Head**: DevTools → Elements → Head section shows all meta tags (description, og:title, og:image, twitter:card...)
-2. **JSON-LD Structured Data**: Script tag visible with type="application/ld+json" containing Movie schema
-3. **Google Rich Results**: Google Rich Results Test tool recognizes "Movie" schema with rating, image, director
+
+**Minh chứng 1: Meta tags trong HTML source** 
+- Mở trang phim: `http://localhost:3000/movies/1`
+- **Chuột phải → View Page Source** (Ctrl+U)
+- **Ctrl+F** tìm `og:title`, `og:description`, `og:image`, `meta name="description"`
+- **Screenshot** hiển thị các tag này trong `<head>`
+- Chứng minh: HTML chứa meta tags động được tạo bởi useHead()
+
+**Minh chứng 2: DevTools Elements tab**
+- **F12 → Elements tab → Ctrl+F** tìm `og:image` hoặc `og:title`
+- **Screenshot** hiển thị các meta tags trong `<head>` section
+- Chứng minh: Meta tags được render đúng trên trang khi load
+
+**Minh chứng 3 (Optional): Google Rich Results Test hoặc Schema.org Validator**
+- Vào https://search.google.com/test/rich-results
+- Paste URL: `http://localhost:3000/movies/1`
+- **Screenshot** kết quả nhận diện Schema "Movie" (nếu có)
+- Chứng minh: Structured data được Google/tools nhận diện đúng format
 
 ---
 
@@ -858,7 +873,7 @@ Sitemap: https://khanlix.com/sitemap.xml
 
 ### 📖 Định nghĩa
 
-**Performance Optimization** là giảm page load time (FCP < 1.8s, LCP < 2.5s, CLS < 0.1) qua lazy loading components/images, code splitting (chia JS thành app.js + pages__index.js + ...), image optimization (WebP format, responsive size), và caching strategy. Kết quả: trang tải nhanh → user không bounce, Google xếp hạng cao, conversion tăng 7%/second.
+**Performance Optimization (Tối ưu hiệu năng)** là các kỹ thuật giúp trang web tải nhanh hơn: lazy loading (chỉ tải hình ảnh khi cần), code splitting (chia JavaScript thành các file nhỏ để trang load nhanh lần đầu), nén hình ảnh sang định dạng WebP nhẹ hơn, và caching (lưu dữ liệu tạm để lần sau không phải tải lại). Kết quả: trang tải nhanh, người dùng không phải đợi, trải nghiệm mượt mà.
 
 ### Nội dung để viết trong báo cáo:
 
