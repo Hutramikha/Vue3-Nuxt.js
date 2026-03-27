@@ -25,6 +25,7 @@ import { useMovieFilter } from '~/composables/useMovieFilter'
 import { useMovieSearch } from '~/composables/useMovieSearch'
 import { useMovieTypeFilter } from '~/composables/useMovieTypeFilter'
 import { useMovieCategories } from '~/composables/useMovieCategories'
+import { useMovieCategoryFilter } from '~/composables/useMovieCategoryFilter'
 
 // ============================================
 // PHẦN 1: LẤY DỮ LIỆU PHIM TỪ API
@@ -134,6 +135,25 @@ const {
   goToPageToday
 } = useMovieCategories(allMovies)
 
+// useMovieCategoryFilter: quản lý lọc phim theo 5 danh mục
+// Khi user chọn một danh mục, hiển thị 10 phim của danh mục đó
+// - selectedCategory: danh mục đã chọn ('new', 'hot', 'mostViewed', 'trending', 'today', hoặc null)
+// - categoryFilteredMoviesPaginated: phim của danh mục, phân trang 16 phim/trang (giống search)
+// - isCategoryFilterMode: true khi đang lọc theo danh mục
+const {
+  selectedCategory,
+  categoryFilterCurrentPage,
+  categoryMap,
+  categoryFilteredMovies,
+  categoryFilteredMoviesPaginated,
+  totalCategoryFilterPages,
+  isCategoryFilterMode,
+  selectedCategoryName,
+  selectCategory,
+  resetCategoryFilter,
+  goToCategoryFilterPage
+} = useMovieCategoryFilter(allMovies)
+
 // useNavigation - xử lý navigation
 const { goHome } = useNavigation()
 
@@ -164,9 +184,12 @@ const route = useRoute()
  */
 watch(() => route.query, (newQuery) => {
   // Kiểm tra nếu không có bất kỳ query parameter nào
-  if (!newQuery.search && !newQuery.genre && !newQuery.year) {
+  if (!newQuery.search && !newQuery.genre && !newQuery.year && !newQuery.type) {
     // Reset tất cả filter state (activeGenreFilters, activeYearFilters...)
     resetFilter()
+    
+    // Reset category filter
+    resetCategoryFilter()
     
     // Ẩn bộ lọc UI
     showFilter.value = false
@@ -798,8 +821,83 @@ const toggleFilter = () => {
       </div>
     </div>
     
+    <!-- ===== SECTION LỌC DANH MỤC (CHẾ ĐỘ 4: LỌC THEO DANH MỤC) ===== -->
+    <!-- v-if="isCategoryFilterMode": Chỉ hiển thị khi người dùng chọn một danh mục -->
+    <div v-if="isCategoryFilterMode" class="mb-24">
+      <!-- ===== TIÊU ĐỀ KẾT QUẢ DANH MỤC ===== -->
+      <div class="mb-10 p-6 rounded-lg bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-600/30">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-3xl font-bold text-white mb-2">
+              {{ selectedCategoryName }}
+              <span class="text-blue-400 text-lg">({{ categoryFilteredMovies.length }} phim)</span>
+            </h2>
+            <p class="text-gray-400 text-sm">Tất cả phim trong danh mục này</p>
+          </div>
+          <!-- NÚT QUAY VỀ DANH MỤC -->
+          <button 
+            @click="resetCategoryFilter"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium"
+          >
+            ← Quay Lại Danh Mục
+          </button>
+        </div>
+      </div>
+      
+      <!-- ===== GRID PHIM DANH MỤC ===== -->
+      <template v-if="categoryFilteredMovies.length > 0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <MovieCard v-for="movie in categoryFilteredMoviesPaginated" :key="movie.id" :movie="movie" />
+        </div>
+        
+        <!-- ===== PHÂN TRANG DANH MỤC ===== -->
+        <div v-if="totalCategoryFilterPages > 1" class="flex justify-center items-center gap-2">
+          <!-- NÚT TRƯỚC -->
+          <button 
+            @click="goToCategoryFilterPage(Math.max(1, categoryFilterCurrentPage - 1))"
+            :disabled="categoryFilterCurrentPage === 1"
+            class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            ← Trước
+          </button>
+          
+          <!-- CÁC NÚT TRANG ===== -->
+          <div class="flex gap-1">
+            <button 
+              v-for="page in totalCategoryFilterPages" 
+              :key="page"
+              @click="goToCategoryFilterPage(page)"
+              :class="[
+                'px-3 py-1 rounded text-sm font-medium transition',
+                categoryFilterCurrentPage === page
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              ]"
+            >
+              {{ page }}
+            </button>
+          </div>
+          
+          <!-- NÚT SAU -->
+          <button 
+            @click="goToCategoryFilterPage(Math.min(totalCategoryFilterPages, categoryFilterCurrentPage + 1))"
+            :disabled="categoryFilterCurrentPage === totalCategoryFilterPages"
+            class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            Sau →
+          </button>
+        </div>
+      </template>
+      
+      <!-- ===== THÔNG BÁO "KHÔNG CÓ PHIM" ===== -->
+      <div v-else class="text-center py-20">
+        <Icon name="heroicons-solid:film" class="w-16 h-16 text-gray-600 mx-auto mb-4" />
+        <p class="text-gray-400 text-lg">Danh mục này không có phim</p>
+      </div>
+    </div>
+    
     <!-- ===== PHẦN DANH MỤC (CHẾ ĐỘ 1: DANH MỤC) ===== -->
-    <!-- v-if="!isFilterMode && !isSearchMode && !isTypeFilterMode": Chỉ hiển thị khi ở chế độ danh mục mặc định
+    <!-- v-if="!isFilterMode && !isSearchMode && !isTypeFilterMode && !isCategoryFilterMode": Chỉ hiển thị khi ở chế độ danh mục mặc định
     
          HIỂN THỊ: Khi user vừa vào trang / bấm "Trang Chủ" / xóa hết các bộ lọc
          
@@ -818,7 +916,22 @@ const toggleFilter = () => {
          QUẢN LÝ STATE: Mỗi danh mục có trạng thái riêng (categories.new.currentPage, categories.hot.currentPage, ...)
          → Khi user click logo "Home", route.query xóa → reset tất cả danh mục về trang 1
     -->
-    <template v-if="!isFilterMode && !isSearchMode && !isTypeFilterMode">
+    <template v-if="!isFilterMode && !isSearchMode && !isTypeFilterMode && !isCategoryFilterMode">
+      
+      <!-- ===== SELECT DANH MỤC ===== -->
+      <div class="mb-12 p-6 rounded-lg bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-600/30">
+        <h3 class="text-lg font-bold text-white mb-4">Lọc Theo Danh Mục</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <button 
+            v-for="(category, key) in categoryMap" 
+            :key="key"
+            @click="selectCategory(key)"
+            class="px-4 py-3 rounded-lg font-medium transition text-center bg-purple-700 hover:bg-purple-600 text-white"
+          >
+            {{ category.name }}
+          </button>
+        </div>
+      </div>
     
     <!-- ====== DANH MỤC 0: PHIM TOP TRENDING (NỔI BẬT ĐẦU TIÊN) ====== -->
     <div class="mb-24 p-6 rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-emerald-600 border-opacity-30 shadow-2xl">
