@@ -1,5 +1,20 @@
 <template>
   <div class="min-h-screen flex flex-col bg-black">
+    <!-- ===== HEADER LAYOUT ===== 
+         Cấu trúc: Logo | Menu điều hướng | Dropdown Danh Mục | Search | Auth Buttons
+         
+         LAYOUT TRÊN DESKTOP:
+         [LOGO] [Trang Chủ] [Phim Lẻ] [Phim Bộ] [▼Danh Mục] | [❤] [⏰] [Search] [Đăng Nhập] [Đăng Ký]
+         
+         CHÚNG NĂNG:
+         1. Logo KHANLIX: Bấm → quay về trang chủ, reset tất cả filters
+         2. Menu chính 3 link: Trang Chủ, Phim Lẻ, Phim Bộ
+         3. Dropdown Danh Mục 3 cột: Thể Loại, Năm, Khác
+         4. Yêu Thích: Link đến trang yêu thích (hoạt động)
+         5. Lịch Sử: Nút placeholder (chưa phát triển)
+         6. Search: Tìm kiếm phim khi bấm Enter
+         7. Đăng Nhập/Ký: Mở auth modal
+    -->
     <header class="bg-gradient-to-b from-black via-gray-950 to-black backdrop-blur-md sticky top-0 z-50 border-b border-emerald-600/30">
       <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
         <!-- PHẦN 1: LOGO + TÊN WEBSITE -->
@@ -38,8 +53,15 @@
             </li>
           </ul>
 
-          <!-- PHẦN 3: DROPDOWN DANH MỤC -->
-          <!-- Dropdown có 3 cột: Thể Loại, Năm Phát Hành, Khác -->
+          <!-- PHẦN 3: DROPDOWN DANH MỤC (3 CỘT: Thể Loại, Năm, Khác) -->
+          <!-- Dropdown mở khi: 1. Click nút Danh Mục, hoặc 2. Di chuột vào (mouseenter)
+               Dropdown đóng khi: 1. Click lại nút, hoặc 2. Di chuột ra (mouseleave)
+               
+               CHỨC NĂNG DROPDOWN:
+               CỘT 1 - Theo Thể Loại: Lọc phim theo thể loại (Hành động, Hài, Kinh dị, ...)
+               CỘT 2 - Theo Năm: Lọc phim theo năm phát hành (2026, 2025, 2024, ...)
+               CỘT 3 - Khác: Các bộ lọc đặc biệt (Top Phim, Phim Mới, Xem Nhiều, ...)
+          -->
           <div class="relative group" @mouseenter="showCategoryDropdown = true" @mouseleave="showCategoryDropdown = false">
             <!-- NÚT DANH MỤC: Click để hiển thị dropdown hoặc di chuột để mở -->
             <button class="flex items-center gap-1 text-white hover:text-emerald-500 transition font-medium py-2">

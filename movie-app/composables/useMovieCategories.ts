@@ -1,23 +1,25 @@
 /**
  * useMovieCategories Composable
  * ========================================
- * Chức năng: Quản lý các danh mục phim (5 danh mục, 10 phim mỗi danh mục)
+ * Chức năng: Quản lý 5 danh mục phim với phân trang riêng
  * 
- * Cách chia dữ liệu:
- * Cả 50 phim được chia thành 5 danh mục:
- * 1. Danh mục 1 (Phim Mới Cập Nhật):      phim id 1-10
- * 2. Danh mục 2 (Phim Kinh Điển):         phim id 11-20
- * 3. Danh mục 3 (Phim Kinh Điển II):      phim id 21-30
- * 4. Danh mục 4 (Trending):               phim id 31-40
- * 5. Danh mục 5 (Phim Lẻ Mới Ra Mắt):     phim id 41-50
+ * CÁCH CHIA 50 PHIM THÀNH 5 DANH MỤC:
+ * Tổng 50 phim (ID 1-50) được chia đều thành 5 danh mục:
+ * 1. new (ID 0-9):          "Phim Mới Cập Nhật" - 10 phim
+ * 2. hot (ID 10-19):        "Phim Hot Hiện Tại" - 10 phim
+ * 3. mostViewed (ID 20-29): "Phim Được Xem Nhiều" - 10 phim
+ * 4. trending (ID 30-39):   "Trending Hôm Nay" - 10 phim
+ * 5. today (ID 40-49):      "Phim Lẻ Mới Ra Mắt" - 10 phim
  * 
- * Mỗi danh mục có phân trang:
- * - 10 phim/danh mục ÷ 5 phim/trang = 2 trang/danh mục
+ * PHÂN TRANG MỖI DANH MỤC:
+ * - Mỗi danh mục: 10 phim
+ * - Hiển thị: 5 phim/trang (fix cứng)
+ * - Tổng trang/danh mục: 10 ÷ 5 = 2 trang
  * 
- * Tại sao chia như vậy:
- * - Dễ dàng hiển thị nhiều thể loại phim
- * - Người dùng có thể chọn danh mục quan tâm
- * - Mỗi danh mục có phân trang riêng (không bị ảnh hưởng lẫn nhau)
+ * QUẢN LÝ STATE:
+ * - Mỗi danh mục có currentPage ref riêng (categories.new.currentPage, categories.hot.currentPage, ...)
+ * - Khi user click logo "Home", tất cả currentPage được reset về 1
+ * - Điều này đảm bảo mỗi danh mục độc lập, không ảnh hưởng lẫn nhau
  */
 
 import { ref, computed } from 'vue'
@@ -27,36 +29,41 @@ export function useMovieCategories(allMovies: any) {
   
   // ========== QUẢN LÝ TRẠNG THÁI DANH MỤC ==========
   // Định nghĩa 5 danh mục với vị trí trong mảng allMovies
-  // Ví dụ: new danh mục từ phim id 0 đến 9 (10 phim)
+  // Mỗi danh mục lưu: name (tên hiển thị), startIndex, endIndex, currentPage (trạng thái phân trang)
+  // 
+  // LƯU Ý: 
+  // - Tên danh mục (new, hot, mostViewed, trending, today) là internal name, không phải tên hiển thị
+  // - Tên hiển thị lấy từ category.name (vd: "Phim Mới Cập Nhật")
+  // - Mỗi danh mục: 10 phim, 2 trang, 5 phim/trang
   const categories = {
     new: {
       name: 'Phim Mới Cập Nhật',
-      startIndex: 0,    // Bắt đầu từ vị trí 0
-      endIndex: 10,     // Kết thúc tại vị trí 10 (10 phim: 0-9)
-      currentPage: ref(1)  // Trang hiện tại của danh mục này
+      startIndex: 0,    // Bắt đầu từ vị trí 0 (phim ID 1)
+      endIndex: 10,     // Kết thúc tại vị trí 10 (phim ID 10, tổng 10 phim: ID 1-10)
+      currentPage: ref(1)  // Trạng thái phân trang riêng: trang 1 hoặc 2
     },
     hot: {
-      name: 'Phim Kinh Điển',
+      name: 'Phim Hot Hiện Tại',  // Gọi là "Hot" để dễ nhận biết, tên hiển thị là "Phim Hot Hiện Tại"
       startIndex: 10,
-      endIndex: 20,
+      endIndex: 20,     // 10 phim: ID 11-20
       currentPage: ref(1)
     },
     mostViewed: {
-      name: 'Phim Kinh Điển II',
+      name: 'Phim Được Xem Nhiều',
       startIndex: 20,
-      endIndex: 30,
+      endIndex: 30,     // 10 phim: ID 21-30
       currentPage: ref(1)
     },
     trending: {
       name: 'Trending Hôm Nay',
       startIndex: 30,
-      endIndex: 40,
+      endIndex: 40,     // 10 phim: ID 31-40
       currentPage: ref(1)
     },
     today: {
       name: 'Phim Lẻ Mới Ra Mắt',
       startIndex: 40,
-      endIndex: 50,
+      endIndex: 50,     // 10 phim: ID 41-50
       currentPage: ref(1)
     }
   }

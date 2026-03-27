@@ -182,11 +182,13 @@ watch(() => route.query, (newQuery) => {
 })
 
 // ============================================
-// PHẦN 5: DỮ LIỆU CAROUSEL QUẢNG CÁO
+// PHẦN 5: DỮ LIỆU CAROUSEL QUẢNG CÁO (Chỉ cho chế độ danh mục)
 // ============================================
 
 /**
  * Dữ liệu cho carousel quảng cáo (4 slides)
+ * Hiển thị: Chỉ khi người dùng ở chế độ danh mục (!isSearchMode && !isTypeFilterMode)
+ * Ẩn: Khi tìm kiếm hoặc lọc loại phim
  * Mỗi slide có:
  * - id: định danh duy nhất
  * - title: tiêu đề quảng cáo
@@ -250,17 +252,25 @@ const advertisements = [
 const { currentIndex: currentAdIndex, nextItem: nextAd, prevItem: prevAd, goToItem: goToAd } = useCarousel(ref(advertisements))
 
 /**
- * Hàm điều hướng đến trang tìm kiếm cụ thể
+ * ===== goToSearchPage(pageNumber) =====
+ * HÀM ĐIỀU HƯỚNG CHO PHÂN TRANG TÌM KIẾM (Chỉ dùng khi isSearchMode = true)
  * 
- * Logic:
- * 1. Kiểm tra pageNumber có hợp lệ không (1 <= page <= totalSearchPages)
- * 2. Nếu hợp lệ: push route mới với query ?search=...&searchPage=...
- * 3. URL thay đổi → useMovieSearch composable sẽ bánh ứng & cập nhật dữ liệu
+ * MỤC ĐÍCH:
+ * - Khi user bấm nút trang số hoặc nút Trước/Sau, chuyển đến trang khác
+ * - Bánh ứng: URL thay đổi → useMovieSearch cập nhật danh sách phim
  * 
- * Ví dụ: pageNumber = 2
- * → router.push({ query: { search: 'avatar', searchPage: 2 } })
- * → URL: ?search=avatar&searchPage=2
- * → searchedMoviesPaginated sẽ hiển thị phim 6-10 thay vì 1-5
+ * PHÂN TRANG TÌM KIẾM:
+ * - 16 phim/trang (fix cứng, không đổi)
+ * - Ví dụ: từ khóa 'avatar' tìm được 32 phim
+ *   → 32 ÷ 16 = 2 trang
+ *   → Trang 1: phim 1-16, Trang 2: phim 17-32
+ * 
+ * CÁCH HOẠT ĐỘNG:
+ * 1. Kiểm tra pageNumber hợp lệ (1 <= page <= totalSearchPages.value)
+ * 2. Nếu hợp lệ: push route mới với tham số mới (?search=...&searchPage=2)
+ * 3. URL thay đổi → query.searchPage thay đổi
+ * 4. useMovieSearch composable phát hiện thay đổi → tính toán lại dữ liệu
+ * 5. searchedMoviesPaginated cập nhật → giao diện render phim trang mới
  */
 const goToSearchPage = async (pageNumber: number) => {
   const router = useRouter()
@@ -275,8 +285,20 @@ const goToSearchPage = async (pageNumber: number) => {
   }
 }
 
-// goToTypeFilterPage(pageNumber): chuyển tới trang khi lọc theo loại phim
-// Khi user click vào nút số trang khi đang xem kết quả lọc loại phim
+/**
+ * ===== goToTypeFilterPage(pageNumber) =====
+ * HÀM ĐIỀU HƯỚNG CHO PHÂN TRANG LỌC LOẠI PHIM (Chỉ dùng khi isTypeFilterMode = true)
+ * 
+ * MỤC ĐÍCH:
+ * - Khi user bấm nút trang số hoặc nút Trước/Sau khi xem Phim Lẻ/Phim Bộ
+ * - Chuyển đến trang khác, bánh ứng cập nhật danh sách
+ * 
+ * PHÂN TRANG LỌC LOẠI:
+ * - 16 phim/trang (fix cứng, không đổi)
+ * - Ví dụ: loại 'single' có 25 phim
+ *   → 25 ÷ 16 = 2 trang (trang 2 chỉ có 9 phim)
+ *   → URL: ?type=single&typeFilterPage=1 hoặc ?type=single&typeFilterPage=2
+ */
 const goToTypeFilterPage = async (pageNumber: number) => {
   const router = useRouter()
   // Kiểm tra pageNumber hợp lệ
@@ -394,9 +416,25 @@ const toggleFilter = () => {
       </div>
     </div>
     
-    <!-- ===== PHẦN HIỂN THỊ KẾT QUẢ TÌM KIẾM ===== -->
-    <!-- v-if="isSearchMode": Chỉ hiển thị khi people đang tìm kiếm
-         (Ẩn carousel, carousel phân trang, v.v) -->
+    <!-- ===== PHẦN HIỂN THỊ KẾT QUẢ TÌM KIẾM (CHẾ ĐỘ 2: TÌM KIẾM) ===== -->
+    <!-- v-if="isSearchMode": Chỉ hiển thị khi người dùng tìm kiếm phim (nhập từ khóa + bấm tìm)
+    
+         KÍCH HOẠT: Khi user nhập từ khóa trong header + bấm tìm kiếm
+         → URL thay đổi thành ?search=từ-khóa
+         → useMovieSearch composable lọc phim khớp với tên/thể loại
+         → Hiển thị kết quả tìm kiếm với phân trang (16 phim/trang)
+         
+         ẨNĐI:
+         - Carousel quảng cáo
+         - 5 danh mục (mặc định)
+         - Bộ lọc phim theo thể loại-năm
+         
+         HÓACH NĂNG:
+         1. Hiển thị tiêu đề "Kết Quả Tìm Kiếm" + số phim tìm được
+         2. Hiển thị danh sách phim khớp với từ khóa (phân trang 16 phim/trang)
+         3. Có nút phân trang: [Trước] [1] [2] [3] [Sau]
+         4. Nếu không tìm thấy: Hiển thị thông báo "Không Tìm Thấy Phim"
+    -->
     <div v-if="isSearchMode" class="mb-24">
     <!-- ===== TIÊU ĐỀ KẾT QUẢ TÌM KIẾM ===== -->
       <!-- Hiển thị từ khóa đã tìm và số phim tìm được -->
@@ -474,8 +512,25 @@ const toggleFilter = () => {
       </div>
     </div>
 
-    <!-- ===== KẾT QUẢ LỌC THEO LOẠI PHIM (LẺ/BỘ) ===== -->
-    <!-- v-if="isTypeFilterMode": Chỉ hiển thị khi người dùng bấm Phim Lẻ hoặc Phim Bộ -->
+    <!-- ===== PHẦN HIỂN THỊ KẾT QUẢ LỌC LOẠI PHIM (CHẾ ĐỘ 3: LỌC LOẠI) ===== -->
+    <!-- v-if="isTypeFilterMode": Chỉ hiển thị khi người dùng lọc theo loại (Phim Lẻ/Phim Bộ)
+    
+         KÍCH HOẠT: Khi user bấm "Phim Lẻ" hoặc "Phim Bộ" trên header
+         → URL thay đổi thành ?type=single hoặc ?type=series
+         → useMovieTypeFilter composable lọc phim theo loại
+         → Hiển thị kết quả với phân trang (16 phim/trang)
+         
+         ẨNĐI:
+         - Carousel quảng cáo
+         - 5 danh mục (mặc định)
+         - Bộ lọc phim theo thể loại-năm
+         
+         HÓACH NĂNG:
+         1. Hiển thị tiêu đề "Phim Lẻ" hoặc "Phim Bộ (Series)" + số phim
+         2. Hiển thị danh sách phim theo loại (phân trang 16 phim/trang)
+         3. Có nút phân trang để chuyển trang
+         4. Nếu không có phim loại này: Hiển thị thông báo
+    -->
     <div v-if="isTypeFilterMode" class="mb-24">
       <!-- ===== TIÊU ĐỀ KẾT QUẢ LỌC LOẠI PHIM ===== -->
       <!-- Hiển thị loại phim đã chọn và số phim tìm được -->
@@ -551,8 +606,15 @@ const toggleFilter = () => {
       </div>
     </div>
     
-    <!-- ===== NÚT MỞ/ĐÓNG BỘ LỌC (TOGGLE FILTER) ===== -->
-    <!-- v-if="!isSearchMode && !isTypeFilterMode": Chỉ hiển thị khi không tìm kiếm và không lọc theo loại -->
+    <!-- ===== NÚT MỞ/ĐÓNG BỘ LỌC (CHẾ ĐỘ 1: DANH MỤC - CÓ LỌC) ===== -->
+    <!-- v-if="!isSearchMode && !isTypeFilterMode": Chỉ hiển thị khi ở chế độ danh mục (không tìm kiếm, không lọc loại)
+         
+         MỤC ĐÍCH: Cho phép người dùng lọc phim theo thể loại và năm
+         - Bấm "Hiện Bộ Lọc" → showFilter = true → hiển thị UI lọc thể loại + năm
+         - Bấm "Ẩn Bộ Lọc" → showFilter = false → ẩn UI lọc, hiển thị 5 danh mục
+         
+         LƯU Ý: Đây là lọc THÊM trên DAnh mục, không phải lọc loại (single/series)
+    -->
     <template v-if="!isSearchMode && !isTypeFilterMode">
     <div class="mb-6 flex items-center gap-2">
       <!-- NÚT TOGGLE: Thay đổi showFilter: true ↔ false -->
@@ -736,8 +798,26 @@ const toggleFilter = () => {
       </div>
     </div>
     
-    <!-- ===== PHẦN DANH MỤC (CHỈ HIỂN THỊ KHI KHÔNG LỌC, TÌM KIẾM, MỤC LỌC LOẠI) ===== -->
-    <!-- Khi không lọc phim: hiển thị 5 danh mục với phim ưu tiên -->
+    <!-- ===== PHẦN DANH MỤC (CHẾ ĐỘ 1: DANH MỤC) ===== -->
+    <!-- v-if="!isFilterMode && !isSearchMode && !isTypeFilterMode": Chỉ hiển thị khi ở chế độ danh mục mặc định
+    
+         HIỂN THỊ: Khi user vừa vào trang / bấm "Trang Chủ" / xóa hết các bộ lọc
+         
+         5 DANH MỤC (Chia 50 phim):
+         1. Trending Hôm Nay (Phim ID 31-40: 10 phim, phân trang 5 phim/trang = 2 trang)
+         2. Phim Mới Cập Nhật (Phim ID 1-10: 10 phim, phân trang 5 phim/trang = 2 trang)
+         3. Phim Hot Hiện Tại (Phim ID 11-20: 10 phim, phân trang 5 phim/trang = 2 trang)
+         4. Phim Được Xem Nhiều (Phim ID 21-30: 10 phim, phân trang 5 phim/trang = 2 trang)
+         5. Phim Lẻ Mới Ra Mắt (Phim ID 41-50: 10 phim, phân trang 5 phim/trang = 2 trang)
+         
+         PHÂN TRANG DANH MỤC (Khác với tìm kiếm):
+         - Mỗi danh mục: 5 phim/trang (fix cứng, không thay đổi)
+         - Mỗi danh mục có phân trang riêng (không ảnh hưởng đến danh mục khác)
+         - Ví dụ: nếu ở trang 2 của danh mục 1, nhưng trang 1 của danh mục 2
+         
+         QUẢN LÝ STATE: Mỗi danh mục có trạng thái riêng (categories.new.currentPage, categories.hot.currentPage, ...)
+         → Khi user click logo "Home", route.query xóa → reset tất cả danh mục về trang 1
+    -->
     <template v-if="!isFilterMode && !isSearchMode && !isTypeFilterMode">
     
     <!-- ====== DANH MỤC 0: PHIM TOP TRENDING (NỔI BẬT ĐẦU TIÊN) ====== -->
