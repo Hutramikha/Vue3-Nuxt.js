@@ -14,6 +14,34 @@
  * - Chế độ lọc: hiển thị kết quả lọc khi người dùng chọn thể loại/năm
  */
 
+// ========== SEO OPTIMIZATION ==========
+// Meta tags cho trang chủ
+useHead({
+  title: 'KHANLIX - Xem Phim Trực Tuyến Miễn Phí | Phim HD',
+  meta: [
+    {
+      name: 'description',
+      content: 'Xem phim trực tuyến hd miễn phí. 50+ bộ phim hay, lọc theo thể loại, tìm kiếm nhanh. KHANLIX - nền tảng xem phim tốt nhất Việt Nam'
+    },
+    {
+      name: 'keywords',
+      content: 'xem phim, phim trực tuyến, phim hd, phim việt, phim lẻ, phim bộ'
+    },
+    {
+      property: 'og:title',
+      content: 'KHANLIX - Xem Phim Đỉnh Cao'
+    },
+    {
+      property: 'og:description',
+      content: 'Web xem phim trực tuyến với giao diện hiện đại, hỗ trợ lọc và tìm kiếm'
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    }
+  ]
+})
+
 // ============================================
 // IMPORT COMPOSABLES & UTILITIES
 // ============================================

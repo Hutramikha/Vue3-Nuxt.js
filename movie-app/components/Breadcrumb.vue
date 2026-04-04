@@ -44,20 +44,16 @@ const navigate = (path: string) => {
 
 <template>
   <div class="flex items-center gap-2 text-sm text-slate-400 mb-6 flex-wrap">
-    <button
-      v-for="(item, idx) in breadcrumbs"
-      :key="item.path"
-      @click="navigate(item.path)"
-      :class="[
-        idx === breadcrumbs.length - 1 ? 'text-white font-medium cursor-default' : 'hover:text-white cursor-pointer'
-      ]"
-    >
-      {{ item.label }}
-    </button>
-    <template v-if="breadcrumbs.length > 0">
-      <template v-for="(_, idx) in breadcrumbs.slice(0, -1)" :key="idx">
-        <span class="text-slate-600">/</span>
-      </template>
+    <template v-for="(item, idx) in breadcrumbs" :key="item.path">
+      <button
+        @click="navigate(item.path)"
+        :class="[
+          idx === breadcrumbs.length - 1 ? 'text-white font-medium cursor-default' : 'hover:text-white cursor-pointer'
+        ]"
+      >
+        {{ item.label }}
+      </button>
+      <span v-if="idx < breadcrumbs.length - 1" class="text-slate-600">/</span>
     </template>
   </div>
 </template>

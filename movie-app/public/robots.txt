@@ -1,2 +1,10 @@
 User-Agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /*?*
+Disallow: /*.json$
+
+Sitemap: https://khanlix.com/sitemap.xml
+
+# Crawl delay for search engines
+Crawl-delay: 1

@@ -731,141 +731,91 @@ interface Movie {
 
 ### 📖 Định nghĩa
 
-**SEO Optimization (Tối ưu SEO)** là quá trình nhúng dữ liệu có cấu trúc vào HTML trang phim bao gồm meta tags (description, Open Graph: og:title, og:image, og:description), JSON-LD structured data (schema.org/Movie) định dạng chuẩn giúp Google/Bing hiểu phim là gì, rating là bao nhiêu, poster là hình gì, từ đó Google sẽ hiển thị thông tin phim trực tiếp trên kết quả tìm kiếm dưới dạng rich snippets với sao đánh giá, hình ảnh poster, mô tả phim. Kết quả: trang phim được xếp hạng cao trên Google khi tìm kiếm (organic traffic tăng), hiển thị rich results trực tiếp trên SERP (Search Engine Results Page), và cải thiện structured data validation khi crawler các công cụ kiểm tra như Google Rich Results Test hoặc Schema.org Validator phân tích HTML source.
+**SEO Optimization** là quá trình nhúng meta tags (description, keywords, Open Graph) và structured data vào HTML trang phim. Giúp Google, Facebook, Twitter hiểu rõ nội dung: tiêu đề phim là gì, poster ra sao, rating bao nhiêu. Kết quả: trang phim được xếp hạng cao hơn, khi share lên mạng xã hội hiển thị đúng tiêu đề + ảnh + mô tả, organic traffic tăng.
 
-### Nội dung để viết trong báo cáo:
+### 💻 Code mẫu:
 
-#### **A. Code Example 1: useJsonLd.ts**
+#### **A. Code Example 1: utils/seo.ts - Tạo meta tags động**
 ```typescript
-/**
- * useJsonLd: Tạo JSON-LD schema cho Google
- * Schema type: Movie + AggregateRating
- */
-export const useJsonLd = () => {
-  const movieSchema = (movie: Movie) => ({
-    '@context': 'https://schema.org/',
-    '@type': 'Movie',
-    name: movie.title,
-    image: `https://khanlix.com${movie.poster}`,
-    datePublished: `${movie.year}-01-01`,
-    director: {
-      '@type': 'Person',
-      name: movie.director || 'Unknown'
-    },
-    actor: (movie.cast || []).map(name => ({
-      '@type': 'Person',
-      name
-    })),
-    description: movie.synopsis,
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: movie.rating,
-      bestRating: '10',
-      worstRating: '1'
-    }
-  })
+// Tạo meta tags dựa trên dữ liệu phim
+export const generateMovieMeta = (movie: any) => {
+  return [
+    { name: 'description', content: `Xem ${movie.title}. Thể loại: ${movie.genre}. Rating: ${movie.rating}/10` },
+    { name: 'keywords', content: `${movie.title}, xem phim, ${movie.genre}` },
+    // Open Graph tags (Facebook, Twitter)
+    { property: 'og:title', content: `${movie.title} | KHANLIX` },
+    { property: 'og:description', content: `Xem ${movie.title} trực tuyến HD` },
+    { property: 'og:image', content: `http://localhost:3000${movie.poster}` },
+    { property: 'og:type', content: 'video.movie' }
+  ]
+}
 
-  return { movieSchema }
+export const generatePageTitle = (movie: any) => {
+  return `${movie.title} | KHANLIX`
 }
 ```
 
-#### **B. Code Example 2: pages/movies/[id].vue**
+#### **B. Code Example 2: pages/movies/[id].vue - Áp dụng useHead()**
 ```vue
-<script setup>
+<script setup lang="ts">
+import { generateMovieMeta, generatePageTitle } from '~/utils/seo'
+
+// Fetch phim
+const { data: allMovies } = await useFetch('/api/movies')
+
+// Lấy movieId từ URL
 const route = useRoute()
-const movieId = parseInt(route.params.id as string)
+const movie = computed(() => {
+  return allMovies.value?.find(m => m.id === parseInt(route.params.id as string))
+})
 
-const { data: movie } = await useFetch(() => `/api/movies?id=${movieId}`)
-
-// Đặt meta tags
-const title = `${movie.value?.title} - KHANLIX`
-const description = movie.value?.synopsis.substring(0, 160)
-
+// ✅ Áp dụng SEO: cập nhật <title> và <meta> tags động
 useHead({
-  title,
-  meta: [
-    { name: 'description', content: description },
-    // Open Graph (Facebook, Twitter)
-    { property: 'og:title', content: movie.value?.title },
-    { property: 'og:description', content: description },
-    { property: 'og:image', content: `https://khanlix.com${movie.value?.poster}` },
-    { property: 'og:type', content: 'video.movie' },
-    // Twitter Card
-    { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: movie.value?.title },
-    { name: 'twitter:description', content: description },
-    { name: 'twitter:image', content: `https://khanlix.com${movie.value?.poster}` },
-  ],
-  // JSON-LD structured data
-  script: [
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify(useJsonLd().movieSchema(movie.value))
-    }
-  ]
+  title: () => generatePageTitle(movie.value || { title: 'Phim' }),
+  meta: () => movie.value ? generateMovieMeta(movie.value) : []
 })
 </script>
 
 <template>
-  <div class="container">
+  <div v-if="movie" class="max-w-6xl mx-auto px-4 py-8">
     <div class="flex gap-8">
-      <!-- Poster -->
-      <NuxtImg :src="movie.poster" :alt="movie.title" class="w-64" />
-      
-      <!-- Details -->
+      <NuxtImg :src="movie.poster" :alt="movie.title" class="w-64 rounded-lg" />
       <div>
-        <h1>{{ movie.title }}</h1>
+        <h1 class="text-4xl font-bold">{{ movie.title }}</h1>
         <p class="text-gray-400">{{ movie.year }} | ⭐ {{ movie.rating }}/10</p>
-        <p class="my-4">{{ movie.synopsis }}</p>
-        <!-- Rating, cast, trailer, etc. -->
+        <p>{{ movie.synopsis }}</p>
       </div>
     </div>
   </div>
 </template>
 ```
 
-#### **C. Code Example 3: Sitemap & robots.txt**
-```xml
-<!-- nuxt.config.ts sitemap config -->
-modules: [
-  '@nuxtjs/sitemap',
-],
-sitemap: {
-  siteUrl: 'https://khanlix.com',
-  routes: async () => {
-    // Điểm đến: GET /api/movies
-    // Trả về: ['/movies/1', '/movies/2', ..., '/movies/50']
-  }
-}
-```
-
-```txt
-<!-- public/robots.txt -->
-User-agent: *
-Allow: /
-Disallow: /api/
-Sitemap: https://khanlix.com/sitemap.xml
-```
-
 ### 🎬 Minh chứng thực nghiệm:
 
-**Minh chứng 1: Meta tags trong HTML source** 
-- Mở trang phim: `http://localhost:3000/movies/1`
-- **Chuột phải → View Page Source** (Ctrl+U)
-- **Ctrl+F** tìm `og:title`, `og:description`, `og:image`, `meta name="description"`
-- **Screenshot** hiển thị các tag này trong `<head>`
-- Chứng minh: HTML chứa meta tags động được tạo bởi useHead()
+**Minh chứng 1: Kiểm tra meta tags trong DevTools**
+- Bước 1: Chạy `npm run dev`
+- Bước 2: Truy cập `http://localhost:3000/movies/1`
+- Bước 3: Nhấn **F12** → chọn tab **Elements**
+- Bước 4: Nhấn **Ctrl+F** tìm `og:title` hoặc `description`
+- Bước 5: **Chụp hình** hiển thị các meta tags trong `<head>`
+  - Nhìn thấy: `<meta property="og:title" content="Lật Mặt 7: Một Điều Ước | KHANLIX">`
+  - Nhìn thấy: `<meta property="og:image" content="http://localhost:3000/images/...">`
+  - Nhìn thấy: `<title>Lật Mặt 7: Một Điều Ước | KHANLIX</title>`
 
-**Minh chứng 2: DevTools Elements tab**
-- **F12 → Elements tab → Ctrl+F** tìm `og:image` hoặc `og:title`
-- **Screenshot** hiển thị các meta tags trong `<head>` section
-- Chứng minh: Meta tags được render đúng trên trang khi load
+**Minh chứng 2: So sánh 2 trang phim khác nhau (Chứng minh SEO động)**
+- Bước 1: Truy cập `/movies/1` → Chụp hình `<title>` + `og:title` + `og:image`
+- Bước 2: Chuyển sang `/movies/2` → Chụp hình `<title>` + `og:title` + `og:image`
+- Bước 3: So sánh 2 hình: **tiêu đề, ảnh khác nhau = SEO hoạt động động** ✅
 
-**Minh chứng 3 (Optional): Google Rich Results Test hoặc Schema.org Validator**
-- Vào https://search.google.com/test/rich-results
-- Paste URL: `http://localhost:3000/movies/1`
-- **Screenshot** kết quả nhận diện Schema "Movie" (nếu có)
-- Chứng minh: Structured data được Google/tools nhận diện đúng format
+**Minh chứng 3: Kiểm tra View Page Source (HTML raw)**
+- Bước 1: Chuột phải trang → **View Page Source** (Ctrl+U)
+- Bước 2: **Ctrl+F** tìm `<meta name="description"`
+- Bước 3: **Chụp hình** hiển thị:
+  ```html
+  <meta name="description" content="Xem Lật Mặt 7: Một Điều Ước. Thể loại: Tâm Lý, Gia Đình. Rating: 9.0/10">
+  <meta property="og:title" content="Lật Mặt 7: Một Điều Ước | KHANLIX">
+  <meta property="og:image" content="http://localhost:3000/images/posters/lat-mat-7.jpg">
+  ```
 
 ---
 

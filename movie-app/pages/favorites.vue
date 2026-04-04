@@ -8,6 +8,30 @@ import { computed, onMounted, ref } from 'vue'
 import { useMovieStore } from '~/stores/movieStore'
 import { useNavigation } from '~/composables/useNavigation'
 
+// ========== SEO OPTIMIZATION ==========
+// Meta tags cho trang yêu thích
+useHead({
+  title: 'Phim Yêu Thích | KHANLIX',
+  meta: [
+    {
+      name: 'description',
+      content: 'Danh sách các bộ phim yêu thích của bạn trên KHANLIX. Quản lý và xem lại những bộ phim bạn yêu thích'
+    },
+    {
+      name: 'keywords',
+      content: 'phim yêu thích, danh sách yêu thích, phim lưu trữ'
+    },
+    {
+      property: 'og:title',
+      content: 'Phim Yêu Thích | KHANLIX'
+    },
+    {
+      property: 'og:description',
+      content: 'Xem danh sách những bộ phim yêu thích của bạn'
+    }
+  ]
+})
+
 // ========== MOVIE STORE ==========
 const movieStore = useMovieStore()
 
