@@ -1016,7 +1016,7 @@ movie-app/
 
 ---
 
-## 💻 Công Nghệ Sử Dụng
+<!-- ## 💻 Công Nghệ Sử Dụng
 
 ### **Frontend Stack**
 
@@ -1047,7 +1047,7 @@ movie-app/
 | **sessionStorage** | (Optional) Lưu trạng thái tạm |
 | **JSON API** | Mock data (server/api/movies.ts) |
 
----
+--- -->
 
 ## 📊 Data Model
 
