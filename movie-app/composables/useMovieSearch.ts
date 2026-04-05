@@ -1,81 +1,91 @@
 /**
- * useMovieSearch Composable
+ * useMovieSearch Composable (Refactored)
  * ========================================
- * Chức năng: Quản lý tìm kiếm phim theo từ khóa
+ * Tìm kiếm phim theo từ khóa với phân trang 16 phim/trang
  * 
  * Cách hoạt động:
- * - Người dùng nhập từ khóa tìm kiếm
- * - Ứng dụng tìm kiếm giống với tên phim hoặc thể loại
- * - Hiển thị kết quả với phân trang (16 phim/trang)
- * 
- * Từ khóa được lưu trong URL (route.query.search):
- * - Ưu điểm: khi chuyển trang, từ khóa vẫn được giữ
- * - Ví dụ: /search?search=hành động&searchPage=1
+ * - User nhập từ khóa tìm kiếm
+ * - Ứng dụng tìm kiếm trong tên phim hoặc thể loại (case-insensitive)
+ * - Hiển thị kết quả với phân trang
+ * - URL được cập nhật: ?search=keyword&searchPage=1
  */
 
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, watch } from 'vue'
+import type { Ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { usePagination } from './usePagination'
 
-export function useMovieSearch(allMovies: any) {
+export function useMovieSearch(allMovies: Ref<any[]>) {
   const route = useRoute()
+  const router = useRouter()
 
-  // ========== GETTERS (COMPUTED - tự động cập nhật) ==========
-  
-  // 1. Lấy từ khóa tìm kiếm từ URL
-  // Ví dụ: URL là /index?search=avatar → searchQuery = "avatar"
-  const searchQuery = computed(() => {
-    return (route.query.search as string) || ''
-  })
+  // ========== LẤY TỪ KHÓA TỪ URL ==========
+  const searchQuery = computed(() => (route.query.search as string) || '')
 
-  // 2. Tìm kiếm phim dựa vào từ khóa
-  // Mục đích: Trả về danh sách phim khớp với từ khóa
-  // Tìm kiếm trong: tên phim hoặc thể loại (không phân biệt hoa/thường)
+  // ========== TÌMKIẾM PHIM ==========
   const searchedMovies = computed(() => {
-    if (!allMovies.value || !searchQuery.value.trim()) return []
-
+    if (!searchQuery.value.trim() || !allMovies.value) return []
+    
     const query = searchQuery.value.toLowerCase().trim()
-    return allMovies.value.filter((movie: any) => {
-      return (
-        movie.title.toLowerCase().includes(query) ||
-        movie.genre.toLowerCase().includes(query)
-      )
-    })
+    return allMovies.value.filter((movie: any) =>
+      movie.title.toLowerCase().includes(query) ||
+      movie.genre.toLowerCase().includes(query)
+    )
   })
 
-  // 3. Lấy trang hiện tại khi tìm kiếm
-  // Ví dụ: URL là /index?search=avatar&searchPage=2 → searchCurrentPage = 2
-  const searchCurrentPage = computed(() => {
-    return parseInt((route.query.searchPage as string) || '1')
+  // ========== PHÂN TRANG TÌM KIẾM ==========
+  const {
+    currentItems: searchedMoviesPaginated,
+    currentPage: searchCurrentPage,
+    totalPages: totalSearchPages,
+    goToPage: goToSearchPageLocal,
+    resetPage: resetSearchPage
+  } = usePagination(searchedMovies, { itemsPerPage: 16 })
+
+  // ========== ĐIỀU HƯỚNG URL ==========
+  // Khi user click nút trang số, update URL query parameter
+  const goToSearchPage = async (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalSearchPages.value) {
+      await router.push({
+        query: {
+          search: searchQuery.value,
+          searchPage: pageNumber
+        }
+      })
+    }
+  }
+
+  // ========== RESET TRANG KHI TÌM KIẾM THAY ĐỔI ==========
+  watch(searchQuery, () => {
+    resetSearchPage()
   })
 
-  // 4. Phim tìm được hiển thị trên trang hiện tại
-  // Mục đích: Phân trang kết quả tìm kiếm (16 phim/trang)
-  const searchedMoviesPaginated = computed(() => {
-    const moviesPerSearchPage = 16
-    const start = (searchCurrentPage.value - 1) * moviesPerSearchPage
-    return searchedMovies.value.slice(start, start + moviesPerSearchPage)
-  })
-
-  // 5. Tổng số trang khi tìm kiếm
-  // Ví dụ: 32 phim trùng ÷ 16 phim/trang = 2 trang
-  const totalSearchPages = computed(() => {
-    if (searchedMovies.value.length === 0) return 1
-    return Math.ceil(searchedMovies.value.length / 16)
-  })
-
-  // 6. Kiểm tra xem đang ở chế độ tìm kiếm hay không
-  // Mục đích: Quyết định hiển thị kết quả tìm kiếm hay danh mục bình thường
-  const isSearchMode = computed(() => {
-    return searchQuery.value.trim().length > 0
+  // ========== ĐỒNG BỘHÓA TRANG TỪ URL ==========
+  // Khi URL thay đổi, cập nhật currentPage từ route.query.searchPage
+  watch(() => route.query.searchPage, (newPage) => {
+    if (newPage) {
+      const pageNum = parseInt(newPage as string)
+      goToSearchPageLocal(pageNum)
+    }
   })
 
   return {
-    // Getters
+    // Input
     searchQuery,
+
+    // Data
     searchedMovies,
-    searchCurrentPage,
     searchedMoviesPaginated,
+
+    // Pagination
+    searchCurrentPage,
     totalSearchPages,
-    isSearchMode
+
+    // Methods
+    goToSearchPage,
+    resetSearchPage,
+
+    // Mode check
+    isSearchMode: computed(() => searchQuery.value.trim().length > 0)
   }
 }

@@ -120,7 +120,8 @@ const {
   searchCurrentPage,
   searchedMoviesPaginated, 
   totalSearchPages, 
-  isSearchMode 
+  isSearchMode,
+  goToSearchPage
 } = useMovieSearch(allMovies)
 
 // useMovieTypeFilter: quản lý lọc phim theo loại (lẻ/bộ)
@@ -134,33 +135,34 @@ const {
   filteredByTypeMoviesPaginated,
   totalTypeFilterPages,
   isTypeFilterMode,
-  typeFilterLabel
+  typeFilterLabel,
+  goToTypeFilterPage
 } = useMovieTypeFilter(allMovies)
 
-// useMovieCategories: quản lý 5 danh mục phim
-// Chia 50 phim thành 5 danh mục, mỗi danh mục 10 phim, phân trang mỗi danh mục
-// - newMoviesPaginated: phim mới cập nhật (id 1-10)
-// - hotMoviesPaginated: phim kinh điển (id 11-20)
-// - mostViewedPaginated: phim kinh điển II (id 21-30)
-// - trendingPaginated: trending hôm nay (id 31-40)
-// - todayPaginated: phim lẻ mới ra mắt (id 41-50)
+// useMovieCategories: quản lý 5 danh mục phim (5 phim/trang, 2 trang/danh mục)
+// Sử dụng usePagination composable mới cho mỗi danh mục
 const {
-  categories,
   newMoviesPaginated,
+  newCurrentPage,
   totalPagesNew,
-  hotMoviesPaginated,
-  totalPagesHot,
-  mostViewedPaginated,
-  totalPagesMostViewed,
-  trendingPaginated,
-  totalPagesTrending,
-  todayPaginated,
-  totalPagesToday,
   goToPageNew,
+  hotMoviesPaginated,
+  hotCurrentPage,
+  totalPagesHot,
   goToPageHot,
+  mostViewedPaginated,
+  mostViewedCurrentPage,
+  totalPagesMostViewed,
   goToPageMostViewed,
+  trendingPaginated,
+  trendingCurrentPage,
+  totalPagesTrending,
   goToPageTrending,
-  goToPageToday
+  todayPaginated,
+  todayCurrentPage,
+  totalPagesToday,
+  goToPageToday,
+  resetAllPages
 } = useMovieCategories(allMovies)
 
 // useMovieCategoryFilter: quản lý lọc phim theo 5 danh mục
@@ -177,6 +179,7 @@ const {
   totalCategoryFilterPages,
   isCategoryFilterMode,
   selectedCategoryName,
+  totalMoviesInCategory,
   selectCategory,
   resetCategoryFilter,
   goToCategoryFilterPage
@@ -222,13 +225,8 @@ watch(() => route.query, (newQuery) => {
     // Ẩn bộ lọc UI
     showFilter.value = false
     
-    // Reset các category pagination về trang đầu tiên (trang 1)
-    // Mỗi danh mục có state currentPage riêng, phải reset hết
-    categories.new.currentPage.value = 1
-    categories.hot.currentPage.value = 1
-    categories.mostViewed.currentPage.value = 1
-    categories.trending.currentPage.value = 1
-    categories.today.currentPage.value = 1
+    // Reset tất cả category pagination về trang 1
+    resetAllPages()
   }
 })
 
@@ -301,67 +299,6 @@ const advertisements = [
  * - goToAd(2): nhảy trực tiếp đến slide 3 (Hộp Quà Tặng)
  */
 const { currentIndex: currentAdIndex, nextItem: nextAd, prevItem: prevAd, goToItem: goToAd } = useCarousel(ref(advertisements))
-
-/**
- * ===== goToSearchPage(pageNumber) =====
- * HÀM ĐIỀU HƯỚNG CHO PHÂN TRANG TÌM KIẾM (Chỉ dùng khi isSearchMode = true)
- * 
- * MỤC ĐÍCH:
- * - Khi user bấm nút trang số hoặc nút Trước/Sau, chuyển đến trang khác
- * - Bánh ứng: URL thay đổi → useMovieSearch cập nhật danh sách phim
- * 
- * PHÂN TRANG TÌM KIẾM:
- * - 16 phim/trang (fix cứng, không đổi)
- * - Ví dụ: từ khóa 'avatar' tìm được 32 phim
- *   → 32 ÷ 16 = 2 trang
- *   → Trang 1: phim 1-16, Trang 2: phim 17-32
- * 
- * CÁCH HOẠT ĐỘNG:
- * 1. Kiểm tra pageNumber hợp lệ (1 <= page <= totalSearchPages.value)
- * 2. Nếu hợp lệ: push route mới với tham số mới (?search=...&searchPage=2)
- * 3. URL thay đổi → query.searchPage thay đổi
- * 4. useMovieSearch composable phát hiện thay đổi → tính toán lại dữ liệu
- * 5. searchedMoviesPaginated cập nhật → giao diện render phim trang mới
- */
-const goToSearchPage = async (pageNumber: number) => {
-  const router = useRouter()
-  // Kiểm tra pageNumber hợp lệ
-  if (pageNumber >= 1 && pageNumber <= totalSearchPages.value) {
-    await router.push({
-      query: {
-        search: searchQuery.value,
-        searchPage: pageNumber
-      }
-    })
-  }
-}
-
-/**
- * ===== goToTypeFilterPage(pageNumber) =====
- * HÀM ĐIỀU HƯỚNG CHO PHÂN TRANG LỌC LOẠI PHIM (Chỉ dùng khi isTypeFilterMode = true)
- * 
- * MỤC ĐÍCH:
- * - Khi user bấm nút trang số hoặc nút Trước/Sau khi xem Phim Lẻ/Phim Bộ
- * - Chuyển đến trang khác, bánh ứng cập nhật danh sách
- * 
- * PHÂN TRANG LỌC LOẠI:
- * - 16 phim/trang (fix cứng, không đổi)
- * - Ví dụ: loại 'single' có 25 phim
- *   → 25 ÷ 16 = 2 trang (trang 2 chỉ có 9 phim)
- *   → URL: ?type=single&typeFilterPage=1 hoặc ?type=single&typeFilterPage=2
- */
-const goToTypeFilterPage = async (pageNumber: number) => {
-  const router = useRouter()
-  // Kiểm tra pageNumber hợp lệ
-  if (pageNumber >= 1 && pageNumber <= totalTypeFilterPages.value) {
-    await router.push({
-      query: {
-        type: typeFilter.value,
-        typeFilterPage: pageNumber
-      }
-    })
-  }
-}
 
 // ============================================
 // PHẦN 7: TOGGLE BỘ LỌC
@@ -766,7 +703,7 @@ const toggleFilter = () => {
           <div>
             <h2 class="text-3xl font-bold text-white mb-2">
               {{ selectedCategoryName }}
-              <span class="text-emerald-400 text-lg">({{ categoryFilteredMovies.length }} phim)</span>
+              <span class="text-emerald-400 text-lg">({{ totalMoviesInCategory }} phim)</span>
             </h2>
             <p class="text-gray-400 text-sm">Tất cả phim trong danh mục này</p>
           </div>
@@ -781,7 +718,7 @@ const toggleFilter = () => {
       </div>
       
       <!-- ===== GRID PHIM DANH MỤC ===== -->
-      <template v-if="categoryFilteredMovies.length > 0">
+      <template v-if="totalCategoryFilterPages > 0">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <MovieCard v-for="movie in categoryFilteredMoviesPaginated" :key="movie.id" :movie="movie" />
         </div>
@@ -855,7 +792,7 @@ const toggleFilter = () => {
       <!-- PHÂN TRANG DANH MỤC TRENDING -->
       <Pagination 
         :totalPages="totalPagesTrending" 
-        :currentPage="categories.trending.currentPage.value"
+        :currentPage="trendingCurrentPage"
         @change-page="goToPageTrending"
       />
     </div>
@@ -877,7 +814,7 @@ const toggleFilter = () => {
       <!-- PHÂN TRANG DANH MỤC NEW -->
       <Pagination 
         :totalPages="totalPagesNew" 
-        :currentPage="categories.new.currentPage.value"
+        :currentPage="newCurrentPage"
         @change-page="goToPageNew"
       />
     </div>
@@ -899,7 +836,7 @@ const toggleFilter = () => {
       <!-- PHÂN TRANG DANH MỤC HOT -->
       <Pagination 
         :totalPages="totalPagesHot" 
-        :currentPage="categories.hot.currentPage.value"
+        :currentPage="hotCurrentPage"
         @change-page="goToPageHot"
       />
     </div>
@@ -921,7 +858,7 @@ const toggleFilter = () => {
       <!-- PHÂN TRANG DANH MỤC MOST VIEWED -->
       <Pagination 
         :totalPages="totalPagesMostViewed" 
-        :currentPage="categories.mostViewed.currentPage.value"
+        :currentPage="mostViewedCurrentPage"
         @change-page="goToPageMostViewed"
       />
     </div>
@@ -943,7 +880,7 @@ const toggleFilter = () => {
       <!-- PHÂN TRANG DANH MỤC TODAY -->
       <Pagination 
         :totalPages="totalPagesToday" 
-        :currentPage="categories.today.currentPage.value"
+        :currentPage="todayCurrentPage"
         @change-page="goToPageToday"
       />
     </div>

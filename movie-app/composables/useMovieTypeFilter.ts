@@ -1,78 +1,74 @@
 /**
- * useMovieTypeFilter Composable
+ * useMovieTypeFilter Composable (Refactored)
  * ========================================
- * Chức năng: Quản lý lọc phim theo loại (Phim Lẻ / Phim Bộ)
+ * Lọc phim theo loại: Phim Lẻ (single) hoặc Phim Bộ (series)
  * 
  * Cách hoạt động:
- * - Người dùng chọn "Phim Lẻ" hoặc "Phim Bộ" trên header
- * - Ứng dụng lọc phim dựa vào type field
- * - Hiển thị kết quả với phân trang (16 phim/trang)
- * 
- * Loại phim được lưu trong URL (route.query.type):
- * - Ưu điểm: khi chuyển trang, loại phim vẫn được giữ
- * - Ví dụ: ?type=single&typeFilterPage=1 (phim lẻ, trang 1)
+ * - User chọn "Phim Lẻ" hoặc "Phim Bộ" trên header
+ * - URL được cập nhật: ?type=single&typeFilterPage=1
+ * - Hiển thị phim lọc với phân trang 16 phim/trang
  */
 
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, watch } from 'vue'
+import type { Ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { usePagination } from './usePagination'
 
-export function useMovieTypeFilter(allMovies: any) {
+export function useMovieTypeFilter(allMovies: Ref<any[]>) {
   const route = useRoute()
+  const router = useRouter()
 
-  // ========== GETTERS (COMPUTED - tự động cập nhật) ==========
-  
-  // 1. Lấy loại phim từ URL
-  // Ví dụ: URL là /index?type=single → typeFilter = "single"
-  const typeFilter = computed(() => {
-    return (route.query.type as string) || ''
-  })
+  // ========== LẤY LỌC LOẠI TỪ URL ==========
+  const typeFilter = computed(() => (route.query.type as string) || '')
 
-  // 2. Lọc phim dựa vào loại
-  // Mục đích: Trả về danh sách phim theo loại (single = phim lẻ, series = phim bộ)
+  // ========== LỌC PHIM THEO LOẠI ==========
   const filteredByTypeMovies = computed(() => {
     if (!allMovies.value || !typeFilter.value) return []
-
-    const type = typeFilter.value.toLowerCase()
     
-    // Nếu không chỉ định type, trả về rỗng
+    const type = typeFilter.value.toLowerCase()
     if (type !== 'single' && type !== 'series') return []
     
     return allMovies.value.filter((movie: any) => {
-      // Nếu movie không có type field, mặc định là single (phim lẻ)
       const movieType = movie.type || 'single'
       return movieType.toLowerCase() === type
     })
   })
 
-  // 3. Lấy trang hiện tại khi lọc theo loại
-  // Ví dụ: URL là /index?type=single&typeFilterPage=2 → typeFilterCurrentPage = 2
-  const typeFilterCurrentPage = computed(() => {
-    return parseInt((route.query.typeFilterPage as string) || '1')
+  // ========== PHÂN TRANG ==========
+  const {
+    currentItems: filteredByTypeMoviesPaginated,
+    currentPage: typeFilterCurrentPage,
+    totalPages: totalTypeFilterPages,
+    goToPage: goToTypeFilterPageLocal,
+    resetPage: resetTypeFilterPage
+  } = usePagination(filteredByTypeMovies, { itemsPerPage: 16 })
+
+  // ========== ĐIỀU HƯỚNG URL ==========
+  const goToTypeFilterPage = async (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalTypeFilterPages.value) {
+      await router.push({
+        query: {
+          type: typeFilter.value,
+          typeFilterPage: pageNumber
+        }
+      })
+    }
+  }
+
+  // ========== ĐỒNG BỘHÓA TRANG TỪ URL ==========
+  watch(() => route.query.typeFilterPage, (newPage) => {
+    if (newPage) {
+      const pageNum = parseInt(newPage as string)
+      goToTypeFilterPageLocal(pageNum)
+    }
   })
 
-  // 4. Phim lọc theo loại hiển thị trên trang hiện tại
-  // Mục đích: Phân trang kết quả lọc (16 phim/trang)
-  const filteredByTypeMoviesPaginated = computed(() => {
-    const moviesPerPage = 16
-    const start = (typeFilterCurrentPage.value - 1) * moviesPerPage
-    return filteredByTypeMovies.value.slice(start, start + moviesPerPage)
+  // ========== RESET TRANG KHI LOẠI THAY ĐỔI ==========
+  watch(typeFilter, () => {
+    resetTypeFilterPage()
   })
 
-  // 5. Tổng số trang khi lọc theo loại
-  // Ví dụ: 25 phim lẻ ÷ 16 phim/trang = 2 trang
-  const totalTypeFilterPages = computed(() => {
-    if (filteredByTypeMovies.value.length === 0) return 1
-    return Math.ceil(filteredByTypeMovies.value.length / 16)
-  })
-
-  // 6. Kiểm tra xem đang ở chế độ lọc loại hay không
-  // Mục đích: Quyết định hiển thị kết quả lọc hay danh mục bình thường
-  const isTypeFilterMode = computed(() => {
-    return typeFilter.value.length > 0
-  })
-
-  // 7. Lấy label của loại phim hiện tại
-  // Mục đích: Hiển thị tên loại phim ở heading (Phim Lẻ / Phim Bộ)
+  // ========== LABEL HIỆN THỊ ==========
   const typeFilterLabel = computed(() => {
     if (typeFilter.value === 'single') return 'Phim Lẻ'
     if (typeFilter.value === 'series') return 'Phim Bộ (Series)'
@@ -80,13 +76,25 @@ export function useMovieTypeFilter(allMovies: any) {
   })
 
   return {
-    // Getters
+    // Input
     typeFilter,
+
+    // Data
     filteredByTypeMovies,
-    typeFilterCurrentPage,
     filteredByTypeMoviesPaginated,
+
+    // Pagination
+    typeFilterCurrentPage,
     totalTypeFilterPages,
-    isTypeFilterMode,
-    typeFilterLabel
+
+    // Methods
+    goToTypeFilterPage,
+    resetTypeFilterPage,
+
+    // Display
+    typeFilterLabel,
+
+    // Mode check
+    isTypeFilterMode: computed(() => typeFilter.value.length > 0)
   }
 }
