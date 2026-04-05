@@ -11,12 +11,11 @@
 
 import { computed, watch } from 'vue'
 import type { Ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { usePagination } from './usePagination'
 
 export function useMovieTypeFilter(allMovies: Ref<any[]>) {
   const route = useRoute()
-  const router = useRouter()
 
   // ========== LẤY LỌC LOẠI TỪ URL ==========
   const typeFilter = computed(() => (route.query.type as string) || '')
@@ -39,28 +38,12 @@ export function useMovieTypeFilter(allMovies: Ref<any[]>) {
     currentItems: filteredByTypeMoviesPaginated,
     currentPage: typeFilterCurrentPage,
     totalPages: totalTypeFilterPages,
-    goToPage: goToTypeFilterPageLocal,
+    goToPage: goToTypeFilterPage,
     resetPage: resetTypeFilterPage
-  } = usePagination(filteredByTypeMovies, { itemsPerPage: 16 })
-
-  // ========== ĐIỀU HƯỚNG URL ==========
-  const goToTypeFilterPage = async (pageNumber: number) => {
-    if (pageNumber >= 1 && pageNumber <= totalTypeFilterPages.value) {
-      await router.push({
-        query: {
-          type: typeFilter.value,
-          typeFilterPage: pageNumber
-        }
-      })
-    }
-  }
-
-  // ========== ĐỒNG BỘHÓA TRANG TỪ URL ==========
-  watch(() => route.query.typeFilterPage, (newPage) => {
-    if (newPage) {
-      const pageNum = parseInt(newPage as string)
-      goToTypeFilterPageLocal(pageNum)
-    }
+  } = usePagination(filteredByTypeMovies, { 
+    itemsPerPage: 16,
+    queryParamName: 'page',
+    useUrlSync: true
   })
 
   // ========== RESET TRANG KHI LOẠI THAY ĐỔI ==========

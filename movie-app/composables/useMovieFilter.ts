@@ -1,5 +1,5 @@
 /**
- * useMovieFilter Composable (Refactored)
+ * useMovieFilter Composable (Updated with URL Sync)
  * ========================================
  * Lọc phim theo thể loại và năm
  * 
@@ -8,6 +8,11 @@
  * - User chọn 1 hoặc nhiều năm
  * - Phim được lọc (AND logic: phải thỏa mãn tất cả thể loại và năm đã chọn)
  * - Hiển thị kết quả với phân trang 16 phim/trang
+ * - URL format: /index?genres=action,comedy&years=2023,2024&page=2
+ * 
+ * URL Examples:
+ * - /index?genres=action&page=1
+ * - /index?genres=action,comedy&years=2023&page=2
  */
 
 import { ref, computed, watch } from 'vue'
@@ -64,13 +69,18 @@ export function useMovieFilter(allMovies: Ref<any[]>) {
   })
 
   // ========== PHÂN TRANG LỌC ==========
+  // Dùng URL sync: /index?genres=action&page=2
   const {
     currentItems: filteredMoviesPaginated,
     currentPage: filterCurrentPage,
     totalPages: totalFilterPages,
-    goToPage: goToFilterPageLocal,
+    goToPage: goToFilterPage,
     resetPage: resetFilterPage
-  } = usePagination(filteredMovies, { itemsPerPage: 16 })
+  } = usePagination(filteredMovies, { 
+    itemsPerPage: 16,
+    queryParamName: 'page',
+    useUrlSync: true
+  })
 
   // ========== PHƯƠNG THỨC LỌC ==========
   const filterByGenre = (genre: string) => {
@@ -91,10 +101,6 @@ export function useMovieFilter(allMovies: Ref<any[]>) {
       newSet.add(year)
     }
     activeYearFilters.value = newSet
-  }
-
-  const goToFilterPage = (pageNumber: number) => {
-    goToFilterPageLocal(pageNumber)
   }
 
   const resetFilter = () => {

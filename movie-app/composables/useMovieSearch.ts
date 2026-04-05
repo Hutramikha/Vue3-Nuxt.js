@@ -1,23 +1,26 @@
 /**
- * useMovieSearch Composable (Refactored)
+ * useMovieSearch Composable (Updated with URL Sync)
  * ========================================
- * Tìm kiếm phim theo từ khóa với phân trang 16 phim/trang
+ * Tìm kiếm phim theo từ khóa với phân trang URL-synced
  * 
  * Cách hoạt động:
  * - User nhập từ khóa tìm kiếm
  * - Ứng dụng tìm kiếm trong tên phim hoặc thể loại (case-insensitive)
  * - Hiển thị kết quả với phân trang
- * - URL được cập nhật: ?search=keyword&searchPage=1
+ * - URL format: /index?search=keyword&page=2 (thay vì searchPage=2)
+ * 
+ * URL Examples:
+ * - /index?search=avatar&page=1
+ * - /index?search=avatar&page=2
  */
 
 import { computed, watch } from 'vue'
 import type { Ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { usePagination } from './usePagination'
 
 export function useMovieSearch(allMovies: Ref<any[]>) {
   const route = useRoute()
-  const router = useRouter()
 
   // ========== LẤY TỪ KHÓA TỪ URL ==========
   const searchQuery = computed(() => (route.query.search as string) || '')
@@ -34,39 +37,22 @@ export function useMovieSearch(allMovies: Ref<any[]>) {
   })
 
   // ========== PHÂN TRANG TÌM KIẾM ==========
+  // Dùng URL sync: /index?search=keyword&page=2
   const {
     currentItems: searchedMoviesPaginated,
     currentPage: searchCurrentPage,
     totalPages: totalSearchPages,
-    goToPage: goToSearchPageLocal,
+    goToPage: goToSearchPage,
     resetPage: resetSearchPage
-  } = usePagination(searchedMovies, { itemsPerPage: 16 })
-
-  // ========== ĐIỀU HƯỚNG URL ==========
-  // Khi user click nút trang số, update URL query parameter
-  const goToSearchPage = async (pageNumber: number) => {
-    if (pageNumber >= 1 && pageNumber <= totalSearchPages.value) {
-      await router.push({
-        query: {
-          search: searchQuery.value,
-          searchPage: pageNumber
-        }
-      })
-    }
-  }
+  } = usePagination(searchedMovies, { 
+    itemsPerPage: 16,
+    queryParamName: 'page',  // Dùng 'page' thay vì 'searchPage'
+    useUrlSync: true  // Tự động sync với URL
+  })
 
   // ========== RESET TRANG KHI TÌM KIẾM THAY ĐỔI ==========
   watch(searchQuery, () => {
     resetSearchPage()
-  })
-
-  // ========== ĐỒNG BỘHÓA TRANG TỪ URL ==========
-  // Khi URL thay đổi, cập nhật currentPage từ route.query.searchPage
-  watch(() => route.query.searchPage, (newPage) => {
-    if (newPage) {
-      const pageNum = parseInt(newPage as string)
-      goToSearchPageLocal(pageNum)
-    }
   })
 
   return {

@@ -1,22 +1,27 @@
 /**
- * useMovieCategoryFilter Composable (Refactored)
+ * useMovieCategoryFilter Composable (Updated with URL Sync)
  * ========================================
  * Lọc phim theo danh mục cụ thể (5 danh mục: new, hot, mostViewed, trending, today)
  * 
  * Cách hoạt động:
  * - User click vào một danh mục cụ thể
  * - Hiển thị tất cả phim của danh mục đó
- * - Phân trang: 16 phim/trang (giống search)
- * - User có thể quay lại chế độ danh mục bằng Home
+ * - Phân trang: 16 phim/trang
+ * - URL format: /index?category=new&page=2
+ * 
+ * URL Examples:
+ * - /index?category=new&page=1
+ * - /index?category=hot&page=2
  */
 
-import { ref, computed } from 'vue'
+import { computed, watch } from 'vue'
 import type { Ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { usePagination } from './usePagination'
 
 export function useMovieCategoryFilter(allMovies: Ref<any[]>) {
-  // ========== STATE ==========
-  const selectedCategory = ref<string | null>(null)
+  const route = useRoute()
+  const router = useRouter()
 
   // ========== ĐỊNH NGHĨA 5 DANH MỤC ==========
   const categoryMap = {
@@ -26,6 +31,9 @@ export function useMovieCategoryFilter(allMovies: Ref<any[]>) {
     trending: { name: 'Trending Hôm Nay', startIndex: 30, endIndex: 40 },
     today: { name: 'Phim Lẻ Mới Ra Mắt', startIndex: 40, endIndex: 50 }
   }
+
+  // ========== LẤY DANH MỤC TỪ URL ==========
+  const selectedCategory = computed(() => (route.query.category as string) || null)
 
   // ========== LẤYPHIM CỦA DANH MỤC ==========
   const categoryFilteredMoviesRef = computed(() => {
@@ -38,13 +46,18 @@ export function useMovieCategoryFilter(allMovies: Ref<any[]>) {
   })
 
   // ========== PHÂN TRANG ==========
+  // Dùng URL sync: /index?category=new&page=2
   const {
     currentItems: categoryFilteredMoviesPaginated,
     currentPage: categoryFilterCurrentPage,
     totalPages: totalCategoryFilterPages,
-    goToPage: goToCategoryFilterPageLocal,
+    goToPage: goToCategoryFilterPage,
     resetPage: resetCategoryFilterPage
-  } = usePagination(categoryFilteredMoviesRef, { itemsPerPage: 16 })
+  } = usePagination(categoryFilteredMoviesRef, { 
+    itemsPerPage: 16,
+    queryParamName: 'page',
+    useUrlSync: true
+  })
 
   // ========== TÊN DANH MỤC HIỆN TẠI ==========
   const selectedCategoryName = computed(() => {
@@ -59,27 +72,22 @@ export function useMovieCategoryFilter(allMovies: Ref<any[]>) {
 
   // ========== PHƯƠNG THỨC ==========
   const selectCategory = (categoryKey: string) => {
-    selectedCategory.value = categoryKey
-    resetCategoryFilterPage()
+    router.push({
+      query: {
+        category: categoryKey,
+        page: 1
+      }
+    })
   }
 
   const resetCategoryFilter = () => {
-    selectedCategory.value = null
-    resetCategoryFilterPage()
-  }
-
-  const goToCategoryFilterPage = (pageNumber: number) => {
-    goToCategoryFilterPageLocal(pageNumber)
+    router.push({ query: {} })
   }
 
   return {
-    // State
-    selectedCategory,
-
     // Data
     categoryMap,
     categoryFilteredMovies: categoryFilteredMoviesRef,
-    categoryFilteredMoviesRef,
     categoryFilteredMoviesPaginated,
 
     // Pagination
@@ -87,6 +95,7 @@ export function useMovieCategoryFilter(allMovies: Ref<any[]>) {
     totalCategoryFilterPages,
 
     // Info
+    selectedCategory,
     selectedCategoryName,
     totalMoviesInCategory,
 
