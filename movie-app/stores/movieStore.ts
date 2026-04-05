@@ -1,5 +1,5 @@
 // ========== MOVIE STORE (PINIA) ==========
-// Quản lý state toàn cầu: favorites, watch history, v.v
+// Quản lý state: favorites
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
