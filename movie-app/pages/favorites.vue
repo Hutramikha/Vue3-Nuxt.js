@@ -69,6 +69,13 @@ const isEmpty = computed(() => {
 const backToHome = async () => {
   await goHome()
 }
+
+// Xóa tất cả yêu thích
+const clearAllFavorites = () => {
+  if (confirm('Bạn có chắc chắn muốn xóa tất cả phim yêu thích? Hành động này không thể hoàn tác.')) {
+    movieStore.clearAllFavorites()
+  }
+}
 </script>
 
 <template>
@@ -88,14 +95,28 @@ const backToHome = async () => {
           </div>
         </div>
 
-        <!-- Back Button -->
-        <button 
-          @click="backToHome"
-          class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition flex items-center gap-2 shadow-lg"
-        >
-          <Icon name="heroicons-solid:arrow-left" class="w-5 h-5" />
-          Quay Lại
-        </button>
+        <!-- Buttons: Xóa tất cả + Quay lại -->
+        <div class="flex items-center gap-3">
+          <!-- Xóa tất cả (Chỉ hiển thị khi có phim yêu thích) -->
+          <button 
+            v-if="!isEmpty"
+            @click="clearAllFavorites"
+            class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition flex items-center gap-2 shadow-lg"
+            title="Xóa tất cả phim yêu thích"
+          >
+            <Icon name="heroicons-solid:trash" class="w-5 h-5" />
+            Xóa Tất Cả
+          </button>
+
+          <!-- Back Button -->
+          <button 
+            @click="backToHome"
+            class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition flex items-center gap-2 shadow-lg"
+          >
+            <Icon name="heroicons-solid:arrow-left" class="w-5 h-5" />
+            Quay Lại
+          </button>
+        </div>
       </div>
 
       <!-- Separator -->
