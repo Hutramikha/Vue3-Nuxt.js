@@ -14,12 +14,15 @@ const { errors, clearError } = useErrorHandler()
   <Teleport to="body">
     <div class="fixed top-4 right-4 z-50 space-y-2 pointer-events-none">
       <!-- Mỗi error là một toast notification -->
-      <TransitionGroup name="toast-slide">
-        <div
+      <Transition
           v-for="(error, index) in errors"
-          :key="error.timestamp"
-          class="pointer-events-auto flex items-start gap-3 px-4 py-3 bg-red-600 text-white rounded-lg shadow-lg max-w-sm border-l-4 border-red-500 animate-pulse-fade"
-        >
+          :key= "`${error.timestamp}-${index}`"
+          name="toast-slide"
+          @enter="() => {}"
+      >
+        <div
+          class="pointer-events-auto flex items-start gap-3 px-4 py-3 bg-red-600 text-white rounded-lg shadow-lg max-w-sm border-l-4 border-red-500 animate-pulse-fade">
+
           <!-- Error Icon -->
           <Icon name="heroicons-solid:exclamation-circle" class="w-5 h-5 flex-shrink-0 mt-0.5" />
 
@@ -32,13 +35,13 @@ const { errors, clearError } = useErrorHandler()
 
           <!-- Close Button -->
           <button
-            @click="clearError(error.timestamp)"
+            @click="clearError(index)"
             class="flex-shrink-0 text-red-200 hover:text-white transition"
           >
             <Icon name="heroicons-solid:x-mark" class="w-4 h-4" />
           </button>
         </div>
-      </TransitionGroup>
+      </Transition>
     </div>
   </Teleport>
 </template>
@@ -48,10 +51,6 @@ const { errors, clearError } = useErrorHandler()
 .toast-slide-enter-active,
 .toast-slide-leave-active {
   transition: all 0.3s ease;
-}
-
-.toast-slide-move {
-  transition: transform 0.3s ease;
 }
 
 .toast-slide-enter-from,
