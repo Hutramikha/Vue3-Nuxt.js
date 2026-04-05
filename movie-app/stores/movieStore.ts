@@ -52,7 +52,7 @@ export const useMovieStore = defineStore('movie', () => {
       // Lưu vào localStorage
       addFavoriteToStorage(movieId)
       
-      console.log(`✅ Added to favorites: ${movieId}`)
+      console.log(`Added to favorites: ${movieId}`)
     }
   }
 
@@ -64,7 +64,7 @@ export const useMovieStore = defineStore('movie', () => {
       // Xóa khỏi localStorage
       removeFavoriteFromStorage(movieId)
       
-      console.log(`❌ Removed from favorites: ${movieId}`)
+      console.log(`Removed from favorites: ${movieId}`)
     }
   }
 
@@ -83,7 +83,7 @@ export const useMovieStore = defineStore('movie', () => {
   const clearAllFavorites = (): void => {
     favorites.value.clear()
     setFavorites([])
-    console.log('🗑️ Cleared all favorites')
+    console.log('Cleared all favorites')
   }
 
   return {
