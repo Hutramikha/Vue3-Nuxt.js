@@ -162,18 +162,32 @@
             <Icon name="heroicons-solid:clock" class="w-5 h-5" />
           </button>
 
-          <!-- TÌM KIẾM: Input tìm kiếm phim -->
+          <!-- TÌM KIẾM: Input tìm kiếm phim với autocomplete -->
           <!-- Chỉ tìm kiếm khi bấm Enter để tối ưu -->
-          <div class="flex items-center bg-gray-900 hover:bg-gray-800 border border-emerald-600/50 px-3 py-2 rounded-full text-sm text-white transition w-56 flex-shrink-0">
-            <!-- Icon kính lúp: biểu tượng tìm kiếm -->
-            <Icon name="heroicons-solid:magnifying-glass" class="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <!-- Input thực tế -->
-            <input 
-              v-model="searchInput"
-              @keyup.enter="handleSearch"
-              type="text"
-              placeholder="Tìm kiếm phim..."
-              class="flex-1 bg-transparent outline-none placeholder-gray-500 ml-2 text-white"
+          <div class="relative w-56 flex-shrink-0">
+            <div class="flex items-center bg-gray-900 hover:bg-gray-800 border border-emerald-600/50 px-3 py-2 rounded-full text-sm text-white transition">
+              <!-- Icon kính lúp: biểu tượng tìm kiếm -->
+              <Icon name="heroicons-solid:magnifying-glass" class="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <!-- Input thực tế -->
+              <input 
+                v-model="searchInput"
+                @keyup.enter="handleSearchWithAutocomplete"
+                @focus="isSearchBoxFocused = true"
+                @blur="isSearchBoxFocused = false"
+                type="text"
+                placeholder="Tìm kiếm phim..."
+                class="flex-1 bg-transparent outline-none placeholder-gray-500 ml-2 text-white"
+              />
+            </div>
+
+            <!-- AUTOCOMPLETE DROPDOWN COMPONENT -->
+            <SearchAutocomplete
+              :suggestions="suggestions"
+              :input-query="autocompleteQuery"
+              :is-open="isSearchBoxFocused"
+              @select-suggestion="handleSelectSuggestion"
+              @clear="clearAutocompleteDropdown"
+              @remove-suggestion="removeFromHistory"
             />
           </div>
 
@@ -334,8 +348,10 @@
 
 
 <script setup lang="ts">
-// ========== IMPORT COMPOSABLE ==========
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useHeader } from '~/composables/useHeader'
+import { useMovieAutocomplete } from '~/composables/useMovieAutocomplete'
 
 // ========== USE HEADER COMPOSABLE ==========
 // Quản lý tất cả state và logic của header
@@ -356,6 +372,57 @@ const {
   filterByViewed,
   clearFilters
 } = useHeader()
+
+// ========== FETCH ALL MOVIES FOR AUTOCOMPLETE ==========
+const allMovies = ref<any[]>([])
+const isSearchBoxFocused = ref(false)
+const router = useRouter()
+
+const { data: moviesData } = await useFetch('/api/movies')
+watch(moviesData, (newData) => {
+  if (newData && Array.isArray(newData)) {
+    allMovies.value = newData
+  }
+}, { immediate: true })
+
+// ========== USE AUTOCOMPLETE COMPOSABLE ==========
+const {
+  inputQuery: autocompleteQuery,
+  suggestions,
+  addToSearchHistory,
+  clearSearchHistory,
+  removeFromHistory
+} = useMovieAutocomplete(allMovies)
+
+// ========== HANDLE AUTOCOMPLETE SELECTION ==========
+const handleSelectSuggestion = async (suggestion: any) => {
+  const query = suggestion.genre === 'Gần đây' ? suggestion.title : suggestion.title
+  addToSearchHistory(query)
+  searchInput.value = ''
+  autocompleteQuery.value = ''
+  isSearchBoxFocused.value = false
+  
+  // Navigate to search results
+  await router.push({ query: { search: query } })
+}
+
+// ========== SYNC SEARCH INPUT WITH AUTOCOMPLETE ==========
+watch(searchInput, (newValue) => {
+  autocompleteQuery.value = newValue
+})
+
+// ========== HANDLE SEARCH WITH HISTORY ==========
+const handleSearchWithAutocomplete = async () => {
+  if (searchInput.value.trim()) {
+    addToSearchHistory(searchInput.value)
+  }
+  await handleSearch()
+}
+
+// ========== CLEAR AUTOCOMPLETE DROPDOWN ==========
+const clearAutocompleteDropdown = () => {
+  isSearchBoxFocused.value = false
+}
 </script>
 
 
