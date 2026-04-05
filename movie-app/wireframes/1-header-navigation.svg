@@ -1,0 +1,77 @@
+<svg viewBox="0 0 1400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Header Background -->
+  <rect x="0" y="0" width="1400" height="80" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  
+  <!-- Logo -->
+  <rect x="20" y="15" width="100" height="50" fill="none" stroke="#6c5ce7" stroke-width="2" rx="4"/>
+  <text x="70" y="48" font-size="24" font-weight="bold" fill="#6c5ce7" text-anchor="middle">🎬 KHANLIX</text>
+  
+  <!-- Navigation Menu -->
+  <g id="nav-buttons">
+    <rect x="150" y="25" width="90" height="30" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+    <text x="195" y="45" font-size="12" fill="#fff" text-anchor="middle">Trang Chủ</text>
+    
+    <rect x="260" y="25" width="80" height="30" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+    <text x="300" y="45" font-size="12" fill="#fff" text-anchor="middle">Phim Lẻ</text>
+    
+    <rect x="360" y="25" width="80" height="30" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+    <text x="400" y="45" font-size="12" fill="#fff" text-anchor="middle">Phim Bộ</text>
+    
+    <rect x="460" y="25" width="120" height="30" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+    <text x="520" y="45" font-size="12" fill="#fff" text-anchor="middle">▼ Danh Mục</text>
+  </g>
+  
+  <!-- Search Bar -->
+  <rect x="650" y="25" width="200" height="30" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+  <text x="660" y="45" font-size="12" fill="#999">🔍 Tìm kiếm phim...</text>
+  
+  <!-- Right Icons -->
+  <g id="right-icons">
+    <rect x="900" y="25" width="40" height="30" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+    <text x="920" y="45" font-size="18" text-anchor="middle">❤️</text>
+    
+    <rect x="960" y="25" width="40" height="30" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+    <text x="980" y="45" font-size="16" text-anchor="middle">🕐</text>
+    
+    <rect x="1020" y="25" width="80" height="30" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+    <text x="1060" y="45" font-size="12" fill="#fff" font-weight="bold" text-anchor="middle">Đăng Nhập</text>
+  </g>
+  
+  <!-- Dropdown Panel -->
+  <g id="dropdown">
+    <rect x="460" y="100" width="500" height="180" fill="#1a1a2e" stroke="#6c5ce7" stroke-width="2" rx="4"/>
+    
+    <!-- Header -->
+    <text x="480" y="125" font-size="13" font-weight="bold" fill="#6c5ce7">Dropdown Danh Mục</text>
+    
+    <!-- Column Headers -->
+    <rect x="480" y="135" width="140" height="25" fill="#2a2a3e" stroke="#444" stroke-width="1" rx="2"/>
+    <text x="550" y="153" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">THỂ LOẠI</text>
+    
+    <rect x="640" y="135" width="140" height="25" fill="#2a2a3e" stroke="#444" stroke-width="1" rx="2"/>
+    <text x="710" y="153" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">NĂM</text>
+    
+    <rect x="800" y="135" width="140" height="25" fill="#2a2a3e" stroke="#444" stroke-width="1" rx="2"/>
+    <text x="870" y="153" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">KHÁC</text>
+    
+    <!-- Genre Items -->
+    <text x="500" y="180" font-size="11" fill="#bbb">☑ Hành Động</text>
+    <text x="500" y="205" font-size="11" fill="#bbb">☑ Hài Hước</text>
+    <text x="500" y="230" font-size="11" fill="#bbb">☑ Kinh Dị</text>
+    <text x="500" y="255" font-size="11" fill="#bbb">☑ Tâm Lý</text>
+    
+    <!-- Year Items -->
+    <text x="660" y="180" font-size="11" fill="#bbb">☑ 2024</text>
+    <text x="660" y="205" font-size="11" fill="#bbb">☑ 2023</text>
+    <text x="660" y="230" font-size="11" fill="#bbb">☑ 2022</text>
+    <text x="660" y="255" font-size="11" fill="#bbb">☑ 1994</text>
+    
+    <!-- Other Items -->
+    <text x="820" y="180" font-size="11" fill="#bbb">☑ Top Films</text>
+    <text x="820" y="205" font-size="11" fill="#bbb">☑ New Films</text>
+    <text x="820" y="230" font-size="11" fill="#bbb">☑ Trending</text>
+  </g>
+  
+  <!-- Footer Info -->
+  <text x="700" y="295" font-size="10" fill="#666" text-anchor="middle">Responsive Header - Desktop View (1400px)</text>
+</svg>

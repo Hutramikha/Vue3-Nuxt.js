@@ -629,6 +629,27 @@ graph TD
     K -->|Click| D
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ---
 
 ## 🎨 Khung Giao Diện (Wireframe)
@@ -652,39 +673,23 @@ Dropdown Danh Mục (when clicked):
 └────────────────────────────────────────────┘
 ```
 
-**Mermaid Code:**
-```mermaid
-graph TD
-    A["Header Bar"]
-    B["Logo: KHANLIX"]
-    C["Navigation"]
-    D["Trang Chủ"]
-    E["Phim Lẻ"]
-    F["Phim Bộ"]
-    G["Danh Mục Dropdown"]
-    H["Genre Column"]
-    I["Year Column"]
-    J["Other Column"]
-    K["Search Bar"]
-    L["Icons"]
-    M["Favorites ❤️"]
-    N["History 🕐"]
-    O["Login Button"]
-    
-    A --> B
-    A --> C
-    A --> K
-    A --> L
-    C --> D
-    C --> E
-    C --> F
-    C --> G
-    G --> H
-    G --> I
-    G --> J
-    L --> M
-    L --> N
-    A --> O
+**PlantUML Code:**
+```plantuml
+@startsalt
+{
+  {T
+    [🎬 KHANLIX] | [Trang Chủ] | [Phim Lẻ] | [Phim Bộ] | [▼ Danh Mục] | | [🔍 Search] | [❤️] | [🕐] | [Đăng Nhập]
+  }
+  .
+  {T
+    Dropdown Danh Mục:
+    [CỘT 1: THỂ LOẠI] | [CỘT 2: NĂM] | [CỘT 3: KHÁC]
+    [☑ Hành Động] | [☑ 2024] | [☑ Top Films]
+    [☑ Hài] | [☑ 2023] | [☑ New Films]
+    [☑ Kinh Dị] | [☑ 2022] | [☑ Trending]
+  }
+}
+@endsalt
 ```
 
 ---
@@ -726,31 +731,27 @@ graph TD
 (Tương tự: 3 danh mục còn lại)
 ```
 
-**Mermaid Code:**
-```mermaid
-graph TD
-    A["HomePage<br/>Mode Danh Mục"]
-    B["Carousel Ads"]
-    C["Trending Today"]
-    D["New Updated"]
-    E["Hot Now"]
-    F["Most Watched"]
-    G["New Single Films"]
-    H["MovieCard"]
-    I["Pagination<br/>5 phim/trang"]
-    
-    A --> B
-    A --> C
-    A --> D
-    A --> E
-    A --> F
-    A --> G
-    C --> H
-    D --> H
-    E --> H
-    F --> H
-    G --> H
-    H --> I
+**PlantUML Code:**
+```plantuml
+@startsalt
+{
+  {T
+    Carousel (4 Slides)
+    .
+    ✨ Trending Hôm Nay (10 phim)
+    [Poster] | [Poster] | [Poster] | [Poster]
+    [❤️] | [❤️] | [❤️] | [❤️]
+    [◀ Prev] [1] [2] [Next▶]
+    .
+    🎬 Phim Mới Cập Nhật (10 phim)
+    [Poster] | [Poster] | [Poster] | [Poster]
+    [❤️] | [❤️] | [❤️] | [❤️]
+    [◀ Prev] [1] [2] [Next▶]
+    .
+    ... (3 danh mục tương tự)
+  }
+}
+@endsalt
 ```
 
 ---
@@ -784,35 +785,27 @@ graph TD
 └───────────────────────────────────────────────────────────┘
 ```
 
-**Mermaid Code:**
-```mermaid
-graph TD
-    A["HomePage<br/>Mode Lọc Danh Mục"]
-    B["5 Category Buttons"]
-    C["Phim Mới"]
-    D["Phim Hot"]
-    E["Xem Nhiều"]
-    F["Trending"]
-    G["Lẻ Mới"]
-    H["Select Category"]
-    I["10 Films Display"]
-    J["Pagination<br/>16 phim/trang"]
-    K["Back to Categories"]
-    
-    A --> B
-    B --> C
-    B --> D
-    B --> E
-    B --> F
-    B --> G
-    C -->|Click| H
-    D -->|Click| H
-    E -->|Click| H
-    F -->|Click| H
-    G -->|Click| H
-    H --> I
-    I --> J
-    J -->|Back| K
+**PlantUML Code:**
+```plantuml
+@startsalt
+{
+  {T
+    Lọc Theo Danh Mục:
+    [Phim Mới] [Phim Hot] [Xem Nhiều] [Trending] [Lẻ Mới]
+    .
+    Phim Hot Hiện Tại (10 phim) [← Quay Lại Danh Mục]
+    [Poster] | [Poster] | [Poster] | [Poster]
+    ID 11 | ID 12 | ID 13 | ID 14
+    [❤️] | [❤️] | [❤️] | [❤️]
+    .
+    [Poster] | [Poster] | [Poster] | [Poster]
+    ID 15 | ID 16 | ... | ...
+    [❤️] | [❤️] | [❤️] | [❤️]
+    .
+    [◀ Prev] [1] [Next▶] (16 phim/trang)
+  }
+}
+@endsalt
 ```
 
 ---
@@ -834,21 +827,22 @@ graph TD
 └───────────────────────────────────────────────────────────┘
 ```
 
-**Mermaid Code:**
-```mermaid
-graph TD
-    A["Search Bar<br/>Query 'Avatar'"]
-    B["API Call<br/>search=avatar"]
-    C["Filter Results<br/>2 Movies"]
-    D["Display MovieCards"]
-    E["Pagination<br/>16 phim/trang"]
-    F["Result Count:<br/>Avatar Found!"]
-    
-    A -->|Submit| B
-    B -->|Response| C
-    C --> F
-    C --> D
-    D --> E
+**PlantUML Code:**
+```plantuml
+@startsalt
+{
+  {T
+    [🔍 Search "Avatar"]
+    Kết Quả Tìm Kiếm: Avatar (2 phim)
+    .
+    [Poster Avatar] | [Poster Avatar 2] | [ ] | [ ]
+    Title 1 | Title 2 | | 
+    [❤️] | [❤️] | | 
+    .
+    [◀ Prev] [1] [Next▶] (16 phim/trang)
+  }
+}
+@endsalt
 ```
 
 ---
@@ -874,30 +868,23 @@ graph TD
 └───────────────────────────────────────────────────────────┘
 ```
 
-**Mermaid Code:**
-```mermaid
-graph TD
-    A["Filter Panel"]
-    B["Genre Checkboxes"]
-    C["Year Checkboxes"]
-    D["Other Options"]
-    E["Clear All Button"]
-    F["Apply Filters"]
-    G["Filter Results"]
-    H["MovieCards Display"]
-    I["Pagination<br/>16 phim/trang"]
-    
-    A --> B
-    A --> C
-    A --> D
-    A --> E
-    B -->|Select| F
-    C -->|Select| F
-    D -->|Select| F
-    E -->|Reset| A
-    F --> G
-    G --> H
-    H --> I
+**PlantUML Code:**
+```plantuml
+@startsalt
+{
+  {T
+    Filter Panel:
+    [☑ Hành Động] [☑ 2024] [☑ Top Films] [Clear All]
+    .
+    Kết Quả Lọc: Hành Động + 2024 (5 phim)
+    [Poster] | [Poster] | [Poster] | [Poster]
+    Title 1 | Title 2 | Title 3 | 
+    [❤️] | [❤️] | [❤️] | 
+    .
+    [◀ Prev] [1] [Next▶] (16 phim/trang)
+  }
+}
+@endsalt
 ```
 
 ---
@@ -924,28 +911,25 @@ graph TD
 └───────────────────────────────────────────────────────────┘
 ```
 
-**Mermaid Code:**
-```mermaid
-graph TD
-    A["Favorites Page"]
-    B["Read from<br/>localStorage"]
-    C["Get Favorite<br/>Movie IDs"]
-    D["Movie List"]
-    E["Movie Card×N"]
-    F["Remove Button ❌"]
-    G["Remove from<br/>Favorites"]
-    H["Clear All<br/>Button"]
-    I["Update<br/>localStorage"]
-    
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    H -->|Click| I
-    F -->|Click| G
-    G --> I
-    I --> C
+**PlantUML Code:**
+```plantuml
+@startsalt
+{
+  {T
+    ❤️ Phim Yêu Thích (5 phim)
+    .
+    [Poster] | [Poster] | [Poster] | [Poster]
+    Title 1 | Title 2 | Title 3 | Title 4
+    [❌ Remove] | [❌ Remove] | [❌ Remove] | [❌ Remove]
+    .
+    [Poster]
+    Title 5
+    [❌ Remove]
+    .
+    [Clear All Favorites]
+  }
+}
+@endsalt
 ```
 
 ---
@@ -967,31 +951,22 @@ graph TD
 └──────────────────┘
 ```
 
-**Mermaid Code:**
-```mermaid
-graph TD
-    A["MovieCard Component"]
-    B["Props:<br/>Movie Object"]
-    C["Poster Image"]
-    D["Movie Title"]
-    E["Rating ⭐"]
-    F["Year"]
-    G["Genre"]
-    H["Heart Icon ❤️"]
-    I["Click Handler"]
-    J["Toggle Favorite"]
-    K["Add/Remove<br/>from favorites"]
-    
-    A --> B
-    B --> C
-    B --> D
-    B --> E
-    B --> F
-    B --> G
-    B --> H
-    H --> I
-    I --> J
-    J --> K
+**PlantUML Code:**
+```plantuml
+@startsalt
+{
+  {B
+    [Poster Image]
+    .
+    Title
+    Rating: ⭐ 8.5
+    Year: 2024
+    Genre: Hành động, Hài
+    .
+    [❤️ Add to Favorites]
+  }
+}
+@endsalt
 ```
 
 

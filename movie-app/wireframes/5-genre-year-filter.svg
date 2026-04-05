@@ -1,0 +1,75 @@
+<svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect x="0" y="0" width="1400" height="800" fill="#0f0f1e"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="1400" height="70" fill="#1a1a2e" stroke="#444" stroke-width="1"/>
+  <text x="50" y="45" font-size="20" font-weight="bold" fill="#6c5ce7">🎬 KHANLIX</text>
+  
+  <!-- Filter Panel -->
+  <rect x="40" y="90" width="1320" height="60" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+  <text x="60" y="115" font-size="12" font-weight="bold" fill="#6c5ce7">Filter Panel:</text>
+  
+  <g id="filter-buttons">
+    <rect x="180" y="110" width="120" height="30" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="3"/>
+    <text x="240" y="130" font-size="11" fill="#fff" text-anchor="middle">☑ Hành Động</text>
+    
+    <rect x="330" y="110" width="100" height="30" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="3"/>
+    <text x="380" y="130" font-size="11" fill="#fff" text-anchor="middle">☑ 2024</text>
+    
+    <rect x="460" y="110" width="120" height="30" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="3"/>
+    <text x="520" y="130" font-size="11" fill="#fff" text-anchor="middle">☑ Top Films</text>
+    
+    <rect x="1220" y="110" width="100" height="30" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="3" opacity="0.6"/>
+    <text x="1270" y="130" font-size="11" fill="#fff" text-anchor="middle">Clear All</text>
+  </g>
+  
+  <!-- Results Header -->
+  <rect x="40" y="170" width="1320" height="50" fill="#2a2a3e" stroke="#6c5ce7" stroke-width="1" rx="4"/>
+  <text x="60" y="200" font-size="14" font-weight="bold" fill="#fff">Kết Quả Lọc: Hành Động + 2024 (5 phim)</text>
+  
+  <!-- Movie Cards Grid -->
+  <g id="filter-results">
+    <!-- Card 1 -->
+    <rect x="40" y="250" width="310" height="380" fill="#1a1a2e" stroke="#6c5ce7" stroke-width="1" rx="6"/>
+    <rect x="50" y="260" width="290" height="170" fill="#2a2a3e" stroke="#444" stroke-width="1" rx="4"/>
+    <text x="195" y="335" font-size="10" fill="#999" text-anchor="middle">Poster 1</text>
+    <text x="60" y="450" font-size="11" font-weight="bold" fill="#fff">Action Movie 1</text>
+    <text x="60" y="468" font-size="10" fill="#bbb">⭐ 8.5 | 2024</text>
+    <rect x="50" y="480" width="270" height="28" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="2" opacity="0.8"/>
+    <text x="185" y="498" font-size="11" fill="#fff" font-weight="bold" text-anchor="middle">❤️ Favorites</text>
+    
+    <!-- Card 2 -->
+    <rect x="380" y="250" width="310" height="380" fill="#1a1a2e" stroke="#6c5ce7" stroke-width="1" rx="6"/>
+    <rect x="390" y="260" width="290" height="170" fill="#2a2a3e" stroke="#444" stroke-width="1" rx="4"/>
+    <text x="535" y="335" font-size="10" fill="#999" text-anchor="middle">Poster 2</text>
+    <text x="400" y="450" font-size="11" font-weight="bold" fill="#fff">Action Movie 2</text>
+    <text x="400" y="468" font-size="10" fill="#bbb">⭐ 9.0 | 2024</text>
+    <rect x="390" y="480" width="270" height="28" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="2" opacity="0.8"/>
+    <text x="525" y="498" font-size="11" fill="#fff" font-weight="bold" text-anchor="middle">❤️ Favorites</text>
+    
+    <!-- Card 3 -->
+    <rect x="720" y="250" width="310" height="380" fill="#1a1a2e" stroke="#6c5ce7" stroke-width="1" rx="6"/>
+    <rect x="730" y="260" width="290" height="170" fill="#2a2a3e" stroke="#444" stroke-width="1" rx="4"/>
+    <text x="875" y="335" font-size="10" fill="#999" text-anchor="middle">Poster 3</text>
+    <text x="740" y="450" font-size="11" font-weight="bold" fill="#fff">Action Movie 3</text>
+    <text x="740" y="468" font-size="10" fill="#bbb">⭐ 8.2 | 2024</text>
+    <rect x="730" y="480" width="270" height="28" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="2" opacity="0.8"/>
+    <text x="865" y="498" font-size="11" fill="#fff" font-weight="bold" text-anchor="middle">❤️ Favorites</text>
+    
+    <!-- Card 4 -->
+    <rect x="1050" y="250" width="310" height="380" fill="#1a1a2e" stroke="#6c5ce7" stroke-width="1" rx="6"/>
+    <rect x="1060" y="260" width="290" height="170" fill="#2a2a3e" stroke="#444" stroke-width="1" rx="4"/>
+    <text x="1205" y="335" font-size="10" fill="#999" text-anchor="middle">Poster 4</text>
+    <text x="1070" y="450" font-size="11" font-weight="bold" fill="#fff">Action Movie 4</text>
+    <text x="1070" y="468" font-size="10" fill="#bbb">⭐ 8.7 | 2024</text>
+    <rect x="1060" y="480" width="270" height="28" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="1" rx="2" opacity="0.8"/>
+    <text x="1195" y="498" font-size="11" fill="#fff" font-weight="bold" text-anchor="middle">❤️ Favorites</text>
+  </g>
+  
+  <!-- Pagination -->
+  <text x="700" y="680" font-size="12" fill="#6c5ce7" text-anchor="middle" font-weight="bold">[◀ Prev] [1] [Next ▶]  (Phân trang 16 phim/trang)</text>
+  
+  <!-- Footer -->
+  <text x="700" y="790" font-size="10" fill="#666" text-anchor="middle">Advanced Filter (Genre + Year) Mode (1400px × 800px)</text>
+</svg>
