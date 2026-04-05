@@ -14,6 +14,34 @@
  * - Chế độ lọc: hiển thị kết quả lọc khi người dùng chọn thể loại/năm
  */
 
+// ========== SEO OPTIMIZATION ==========
+// Meta tags cho trang chủ
+useHead({
+  title: 'KHANLIX - Xem Phim Trực Tuyến Miễn Phí | Phim HD',
+  meta: [
+    {
+      name: 'description',
+      content: 'Xem phim trực tuyến hd miễn phí. 50+ bộ phim hay, lọc theo thể loại, tìm kiếm nhanh. KHANLIX - nền tảng xem phim tốt nhất Việt Nam'
+    },
+    {
+      name: 'keywords',
+      content: 'xem phim, phim trực tuyến, phim hd, phim việt, phim lẻ, phim bộ'
+    },
+    {
+      property: 'og:title',
+      content: 'KHANLIX - Xem Phim Đỉnh Cao'
+    },
+    {
+      property: 'og:description',
+      content: 'Web xem phim trực tuyến với giao diện hiện đại, hỗ trợ lọc và tìm kiếm'
+    },
+    {
+      property: 'og:type',
+      content: 'website'
+    }
+  ]
+})
+
 // ============================================
 // IMPORT COMPOSABLES & UTILITIES
 // ============================================
@@ -484,42 +512,12 @@ const toggleFilter = () => {
         </div>
         
         <!-- ===== PHÂN TRANG TÌM KIẾM ===== -->
-        <!-- v-if="totalSearchPages > 1": Chỉ hiển thị nếu > 1 trang
-             Ví dụ: 20 phim tìm được ÷ 5 phim/trang = 4 trang -->
-        <div v-if="totalSearchPages > 1" class="flex justify-center items-center gap-2">
-          <!-- NÚT TRƯỚC: Quay lại trang trước -->
-          <button 
-            @click="goToSearchPage(Math.max(1, searchCurrentPage - 1))"
-            :disabled="searchCurrentPage === 1"
-            class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            ← Trước
-          </button>
-          
-          <!-- CÁC NÚT TRANG ỐỀ -->
-          <!-- v-for="page in totalSearchPages": tạo nút cho mỗi trang
-               Ví dụ: 4 trang → 4 nút (1, 2, 3, 4) -->
-          <div class="flex gap-1">
-            <button 
-              v-for="page in totalSearchPages" 
-              :key="page"
-              @click="goToSearchPage(page)"
-              :class="page === searchCurrentPage ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
-              class="px-3 py-1 text-sm rounded font-semibold transition"
-            >
-              {{ page }}
-            </button>
-          </div>
-          
-          <!-- NÚT SAU: Chuyển đến trang tiếp theo -->
-          <button 
-            @click="goToSearchPage(Math.min(totalSearchPages, searchCurrentPage + 1))"
-            :disabled="searchCurrentPage === totalSearchPages"
-            class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            Sau →
-          </button>
-        </div>
+        <!-- PHÂN TRANG TÌM KIẾM -->
+        <Pagination 
+          :totalPages="totalSearchPages" 
+          :currentPage="searchCurrentPage"
+          @change-page="goToSearchPage"
+        />
       </template>
       
       <!-- ===== THÔNG BÁO KHÔNG TÌM THẤY PHIM ===== -->
@@ -580,40 +578,12 @@ const toggleFilter = () => {
           <MovieCard v-for="movie in filteredByTypeMoviesPaginated" :key="movie.id" :movie="movie" />
         </div>
         
-        <!-- ===== PHÂN TRANG KẾT QUẢ LỌC LOẠI ===== -->
-        <!-- v-if="totalTypeFilterPages > 1": Chỉ hiển thị nếu > 1 trang -->
-        <div v-if="totalTypeFilterPages > 1" class="flex justify-center items-center gap-2">
-          <!-- NÚT TRƯỚC -->
-          <button 
-            @click="goToTypeFilterPage(Math.max(1, typeFilterCurrentPage - 1))"
-            :disabled="typeFilterCurrentPage === 1"
-            class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            ← Trước
-          </button>
-          
-          <!-- CÁC NÚT TRANG -->
-          <div class="flex gap-1">
-            <button 
-              v-for="page in totalTypeFilterPages" 
-              :key="page"
-              @click="goToTypeFilterPage(page)"
-              :class="page === typeFilterCurrentPage ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
-              class="px-3 py-1 text-sm rounded font-semibold transition"
-            >
-              {{ page }}
-            </button>
-          </div>
-          
-          <!-- NÚT SAU -->
-          <button 
-            @click="goToTypeFilterPage(Math.min(totalTypeFilterPages, typeFilterCurrentPage + 1))"
-            :disabled="typeFilterCurrentPage === totalTypeFilterPages"
-            class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            Sau →
-          </button>
-        </div>
+        <!-- PHÂN TRANG LỌC LOẠI PHIM -->
+        <Pagination 
+          :totalPages="totalTypeFilterPages" 
+          :currentPage="typeFilterCurrentPage"
+          @change-page="goToTypeFilterPage"
+        />
       </template>
       
       <!-- ===== THÔNG BÁO KHÔNG TÌM THẤY PHIM THEO LOẠI ===== -->
@@ -706,7 +676,7 @@ const toggleFilter = () => {
             :class="[
               'px-4 py-2 rounded-lg font-semibold transition text-sm',
               activeYearFilters.has(year)
-                ? 'bg-blue-600 text-white'
+                ? 'bg-emerald-600 text-white'
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
             ]"
           >
@@ -762,11 +732,11 @@ const toggleFilter = () => {
           <span 
             v-for="year in activeYearFilters" 
             :key="year"
-            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-600/30 border border-blue-500 text-blue-300 text-sm font-semibold"
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-600/30 border border-emerald-500 text-emerald-300 text-sm font-semibold"
           >
             {{ year }}
             <!-- Nút × để bỏ chọn năm này -->
-            <button @click="filterByYear(year)" class="hover:text-blue-100">✕</button>
+            <button @click="filterByYear(year)" class="hover:text-emerald-100">✕</button>
           </span>
         </div>
       </div>
@@ -779,65 +749,31 @@ const toggleFilter = () => {
       </div>
       
       <!-- ===== PHÂN TRANG KHI LỌC PHIM ===== -->
-      <!-- totalFilterPages: số trang kết quả lọc
-           filterCurrentPage: trang hiện tại -->
-      <div v-if="totalFilterPages > 1" class="flex justify-center items-center gap-2">
-        <!-- NÚT TRƯỚC -->
-        <button 
-          @click="goToFilterPage(filterCurrentPage - 1)"
-          :disabled="filterCurrentPage === 1"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          ← Trước
-        </button>
-        
-        <!-- CÁC NÚT TRANG SỐ -->
-        <div class="flex gap-1">
-          <button 
-            v-for="page in totalFilterPages" 
-            :key="page"
-            @click="goToFilterPage(page)"
-            :class="[
-              'px-3 py-1 text-sm rounded font-semibold transition',
-              // Trang hiện tại: nền emerald, chữ trắng
-              // Các trang khác: nền xám, có thể nhấn
-              filterCurrentPage === page 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            ]"
-          >
-            {{ page }}
-          </button>
-        </div>
-        
-        <!-- NÚT SAU -->
-        <button 
-          @click="goToFilterPage(filterCurrentPage + 1)"
-          :disabled="filterCurrentPage === totalFilterPages"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          Sau →
-        </button>
-      </div>
+      <!-- PHÂN TRANG KẾT QUẢ LỌC -->
+      <Pagination 
+        :totalPages="totalFilterPages" 
+        :currentPage="filterCurrentPage"
+        @change-page="goToFilterPage"
+      />
     </div>
     
     <!-- ===== SECTION LỌC DANH MỤC (CHẾ ĐỘ 4: LỌC THEO DANH MỤC) ===== -->
     <!-- v-if="isCategoryFilterMode": Chỉ hiển thị khi người dùng chọn một danh mục -->
     <div v-if="isCategoryFilterMode" class="mb-24">
       <!-- ===== TIÊU ĐỀ KẾT QUẢ DANH MỤC ===== -->
-      <div class="mb-10 p-6 rounded-lg bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-600/30">
+      <div class="mb-10 p-6 rounded-lg bg-gradient-to-r from-emerald-600/20 to-purple-600/20 border border-emerald-600/30">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-3xl font-bold text-white mb-2">
               {{ selectedCategoryName }}
-              <span class="text-blue-400 text-lg">({{ categoryFilteredMovies.length }} phim)</span>
+              <span class="text-emerald-400 text-lg">({{ categoryFilteredMovies.length }} phim)</span>
             </h2>
             <p class="text-gray-400 text-sm">Tất cả phim trong danh mục này</p>
           </div>
           <!-- NÚT QUAY VỀ DANH MỤC -->
           <button 
             @click="resetCategoryFilter"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition font-medium"
           >
             ← Quay Lại Danh Mục
           </button>
@@ -850,43 +786,12 @@ const toggleFilter = () => {
           <MovieCard v-for="movie in categoryFilteredMoviesPaginated" :key="movie.id" :movie="movie" />
         </div>
         
-        <!-- ===== PHÂN TRANG DANH MỤC ===== -->
-        <div v-if="totalCategoryFilterPages > 1" class="flex justify-center items-center gap-2">
-          <!-- NÚT TRƯỚC -->
-          <button 
-            @click="goToCategoryFilterPage(Math.max(1, categoryFilterCurrentPage - 1))"
-            :disabled="categoryFilterCurrentPage === 1"
-            class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            ← Trước
-          </button>
-          
-          <!-- CÁC NÚT TRANG ===== -->
-          <div class="flex gap-1">
-            <button 
-              v-for="page in totalCategoryFilterPages" 
-              :key="page"
-              @click="goToCategoryFilterPage(page)"
-              :class="[
-                'px-3 py-1 rounded text-sm font-medium transition',
-                categoryFilterCurrentPage === page
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              ]"
-            >
-              {{ page }}
-            </button>
-          </div>
-          
-          <!-- NÚT SAU -->
-          <button 
-            @click="goToCategoryFilterPage(Math.min(totalCategoryFilterPages, categoryFilterCurrentPage + 1))"
-            :disabled="categoryFilterCurrentPage === totalCategoryFilterPages"
-            class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            Sau →
-          </button>
-        </div>
+        <!-- PHÂN TRANG DANH MỤC -->
+        <Pagination 
+          :totalPages="totalCategoryFilterPages" 
+          :currentPage="categoryFilterCurrentPage"
+          @change-page="goToCategoryFilterPage"
+        />
       </template>
       
       <!-- ===== THÔNG BÁO "KHÔNG CÓ PHIM" ===== -->
@@ -947,38 +852,12 @@ const toggleFilter = () => {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-6">
         <MovieCard v-for="movie in trendingPaginated" :key="movie.id" :movie="movie" />
       </div>
-      <!-- PAGINATION cho hàng này -->
-      <div v-if="totalPagesTrending > 1" class="flex justify-center items-center gap-2">
-        <button 
-          @click="goToPageTrending(categories.trending.currentPage.value - 1)"
-          :disabled="categories.trending.currentPage.value === 1"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          ← Trước
-        </button>
-        <div class="flex gap-1">
-          <button 
-            v-for="page in totalPagesTrending" 
-            :key="page"
-            @click="goToPageTrending(page)"
-            :class="[
-              'px-3 py-1 text-sm rounded font-semibold transition',
-              categories.trending.currentPage.value === page 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            ]"
-          >
-            {{ page }}
-          </button>
-        </div>
-        <button 
-          @click="goToPageTrending(categories.trending.currentPage.value + 1)"
-          :disabled="categories.trending.currentPage.value === totalPagesTrending"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          Sau →
-        </button>
-      </div>
+      <!-- PHÂN TRANG DANH MỤC TRENDING -->
+      <Pagination 
+        :totalPages="totalPagesTrending" 
+        :currentPage="categories.trending.currentPage.value"
+        @change-page="goToPageTrending"
+      />
     </div>
 
     <!-- ====== DANH MỤC 1: PHIM MỚI CẬP NHẬT ====== -->
@@ -995,38 +874,12 @@ const toggleFilter = () => {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
         <MovieCard v-for="movie in newMoviesPaginated" :key="movie.id" :movie="movie" />
       </div>
-      <!-- PAGINATION cho hàng này -->
-      <div v-if="totalPagesNew > 1" class="flex justify-center items-center gap-2">
-        <button 
-          @click="goToPageNew(categories.new.currentPage.value - 1)"
-          :disabled="categories.new.currentPage.value === 1"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          ← Trước
-        </button>
-        <div class="flex gap-1">
-          <button 
-            v-for="page in totalPagesNew" 
-            :key="page"
-            @click="goToPageNew(page)"
-            :class="[
-              'px-3 py-1 text-sm rounded font-semibold transition',
-              categories.new.currentPage.value === page 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            ]"
-          >
-            {{ page }}
-          </button>
-        </div>
-        <button 
-          @click="goToPageNew(categories.new.currentPage.value + 1)"
-          :disabled="categories.new.currentPage.value === totalPagesNew"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          Sau →
-        </button>
-      </div>
+      <!-- PHÂN TRANG DANH MỤC NEW -->
+      <Pagination 
+        :totalPages="totalPagesNew" 
+        :currentPage="categories.new.currentPage.value"
+        @change-page="goToPageNew"
+      />
     </div>
 
     <!-- ====== DANH MỤC 2: PHIM HOT HIỆN TẠI ====== -->
@@ -1043,38 +896,12 @@ const toggleFilter = () => {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
         <MovieCard v-for="movie in hotMoviesPaginated" :key="movie.id" :movie="movie" />
       </div>
-      <!-- PAGINATION cho hàng này -->
-      <div v-if="totalPagesHot > 1" class="flex justify-center items-center gap-2">
-        <button 
-          @click="goToPageHot(categories.hot.currentPage.value - 1)"
-          :disabled="totalPagesHot === 1"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          ← Trước
-        </button>
-        <div class="flex gap-1">
-          <button 
-            v-for="page in totalPagesHot" 
-            :key="page"
-            @click="goToPageHot(page)"
-            :class="[
-              'px-3 py-1 text-sm rounded font-semibold transition',
-              categories.hot.currentPage.value === page 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            ]"
-          >
-            {{ page }}
-          </button>
-        </div>
-        <button 
-          @click="goToPageHot(categories.hot.currentPage.value + 1)"
-          :disabled="categories.hot.currentPage.value === totalPagesHot"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          Sau →
-        </button>
-      </div>
+      <!-- PHÂN TRANG DANH MỤC HOT -->
+      <Pagination 
+        :totalPages="totalPagesHot" 
+        :currentPage="categories.hot.currentPage.value"
+        @change-page="goToPageHot"
+      />
     </div>
 
     <!-- ====== DANH MỤC 3: PHIM ĐƯỢC XEM NHIỀU ====== -->
@@ -1091,38 +918,12 @@ const toggleFilter = () => {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
         <MovieCard v-for="movie in mostViewedPaginated" :key="movie.id" :movie="movie" />
       </div>
-      <!-- PAGINATION cho hàng này -->
-      <div v-if="totalPagesMostViewed > 1" class="flex justify-center items-center gap-2">
-        <button 
-          @click="goToPageMostViewed(categories.mostViewed.currentPage.value - 1)"
-          :disabled="categories.mostViewed.currentPage.value === 1"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          ← Trước
-        </button>
-        <div class="flex gap-1">
-          <button 
-            v-for="page in totalPagesMostViewed" 
-            :key="page"
-            @click="goToPageMostViewed(page)"
-            :class="[
-              'px-3 py-1 text-sm rounded font-semibold transition',
-              categories.mostViewed.currentPage.value === page 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            ]"
-          >
-            {{ page }}
-          </button>
-        </div>
-        <button 
-          @click="goToPageMostViewed(categories.mostViewed.currentPage.value + 1)"
-          :disabled="categories.mostViewed.currentPage.value === totalPagesMostViewed"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          Sau →
-        </button>
-      </div>
+      <!-- PHÂN TRANG DANH MỤC MOST VIEWED -->
+      <Pagination 
+        :totalPages="totalPagesMostViewed" 
+        :currentPage="categories.mostViewed.currentPage.value"
+        @change-page="goToPageMostViewed"
+      />
     </div>
 
     <!-- ====== DANH MỤC 5: PHIM LẺ MỚI RA MẮT ====== -->
@@ -1139,38 +940,12 @@ const toggleFilter = () => {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
         <MovieCard v-for="movie in todayPaginated" :key="movie.id" :movie="movie" />
       </div>
-      <!-- PAGINATION cho hàng này -->
-      <div v-if="totalPagesToday > 1" class="flex justify-center items-center gap-2">
-        <button 
-          @click="goToPageToday(categories.today.currentPage.value - 1)"
-          :disabled="categories.today.currentPage.value === 1"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          ← Trước
-        </button>
-        <div class="flex gap-1">
-          <button 
-            v-for="page in totalPagesToday" 
-            :key="page"
-            @click="goToPageToday(page)"
-            :class="[
-              'px-3 py-1 text-sm rounded font-semibold transition',
-              categories.today.currentPage.value === page 
-                ? 'bg-emerald-600 text-white' 
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            ]"
-          >
-            {{ page }}
-          </button>
-        </div>
-        <button 
-          @click="goToPageToday(categories.today.currentPage.value + 1)"
-          :disabled="categories.today.currentPage.value === totalPagesToday"
-          class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          Sau →
-        </button>
-      </div>
+      <!-- PHÂN TRANG DANH MỤC TODAY -->
+      <Pagination 
+        :totalPages="totalPagesToday" 
+        :currentPage="categories.today.currentPage.value"
+        @change-page="goToPageToday"
+      />
     </div>
     
     </template>

@@ -170,6 +170,35 @@ Response: [25_movies]
 localStorage.favorites = "[1, 5, 12, 33, 45]"  // Array IDs
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ---
 
 ## 🔄 Sơ Đồ Luồng Hệ Thống
@@ -965,6 +994,47 @@ graph TD
     J --> K
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ---
 
 ## 🏗️ Kiến Trúc Thành Phần
@@ -1016,7 +1086,7 @@ movie-app/
 
 ---
 
-## 💻 Công Nghệ Sử Dụng
+<!-- ## 💻 Công Nghệ Sử Dụng
 
 ### **Frontend Stack**
 
@@ -1047,7 +1117,7 @@ movie-app/
 | **sessionStorage** | (Optional) Lưu trạng thái tạm |
 | **JSON API** | Mock data (server/api/movies.ts) |
 
----
+--- -->
 
 ## 📊 Data Model
 
