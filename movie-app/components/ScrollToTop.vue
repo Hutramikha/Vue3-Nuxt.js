@@ -34,7 +34,11 @@ const isVisible = ref(false)
 
 // Tính toán khi nào hiển thị nút (khi scroll xuống hơn 300px)
 const handleScroll = () => {
-  isVisible.value = window.scrollY > 300
+  // Chỉ thực hiện logic khi cần thiết để tránh re-render liên tục
+  const scrollPos = window.scrollY > 300
+  if (isVisible.value !== scrollPos) {
+    isVisible.value = scrollPos
+  }
 }
 
 // Smooth scroll về top
