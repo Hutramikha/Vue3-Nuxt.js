@@ -397,9 +397,9 @@ Dự án này được cấp phép dưới **MIT License** - xem file [LICENSE](
 
 ## Liên Hệ
 
-- **Tác giả**: [Tên của bạn]
-- **Email**: [Email của bạn]
-- **GitHub**: [GitHub profile]
+- **Tác giả**: Khang
+- **Email**: minhkhang28042k4@gmail.com
+- **GitHub**: https://github.com/Hutramikha
 
 ---
 
