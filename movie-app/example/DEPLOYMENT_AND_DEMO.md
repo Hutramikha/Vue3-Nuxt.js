@@ -507,7 +507,118 @@ Tab Application cho phép bạn xem dữ liệu được lưu trữ trong localS
 
 ### Triển Khai Lên Vercel
 
-Vercel là một nền tảng phổ biến để triển khai các ứng dụng Nuxt. Để triển khai ứng dụng của bạn, trước tiên hãy đẩy mã của bạn lên một kho GitHub, sau đó kết nối kho đó với tài khoản Vercel của bạn. Vercel sẽ tự động phát hiện rằng ứng dụng của bạn là một ứng dụng Nuxt và sẽ cấu hình các cài đặt xây dựng một cách thích hợp. Một khi triển khai thành công, ứng dụng của bạn sẽ có sẵn ở một URL công khai mà bạn có thể chia sẻ với những người khác.
+Vercel là một nền tảng phổ biến để triển khai các ứng dụng Nuxt. Hướng dẫn chi tiết từng bước:
+
+**Bước 1: Tạo Repository Trên GitHub**
+```
+1. Đăng nhập vào GitHub (https://github.com)
+2. Nhấp "New" để tạo repository mới
+3. Đặt tên: movie-app
+4. Chọn "Public" để công khai
+5. Nhấp "Create Repository"
+```
+
+**Bước 2: Push Mã Lên GitHub**
+```bash
+cd d:\Github\Vue3-Nuxt.js\movie-app
+
+# Khởi tạo git (nếu chưa có)
+git init
+
+# Thêm tất cả file vào git
+git add .
+
+# Tạo commit đầu tiên
+git commit -m "Initial commit: KHANLIX Movie Application"
+
+# Thêm remote repository (thay <username> và <repo-name> bằng của bạn)
+git remote add origin https://github.com/<username>/movie-app.git
+
+# Push code lên GitHub
+git branch -M main
+git push -u origin main
+```
+
+**Bước 3: Đăng Ký Vercel**
+```
+1. Truy cập https://vercel.com
+2. Nhấp "Sign Up"
+3. Chọn đăng nhập bằng GitHub
+4. Ủy quyền Vercel truy cập tài khoản GitHub của bạn
+5. Nhập tên và email của bạn
+6. Nhấp "Create Account"
+```
+
+**Bước 4: Tạo Project Trên Vercel**
+```
+1. Sau khi đăng ký, bạn sẽ được dẫn đến Dashboard của Vercel
+2. Nhấp "Add New..." → "Project"
+3. Tìm repository "movie-app" trong danh sách
+4. Nhấp vào repository để import
+5. Vercel sẽ tự động phát hiện đây là dự án Nuxt
+6. Cài đặt Build sẽ là:
+   - Framework: Nuxt.js
+   - Build Command: npm run build
+   - Output Directory: .output/public
+```
+
+**Bước 5: Cấu Hình Environment (Nếu Cần)**
+```
+Nếu dự án của bạn cần environment variables:
+1. Trên trang cấu hình, cuộn xuống tìm "Environment Variables"
+2. Nhấp "Add"
+3. Nhập các biến cần thiết (hiện tại KHANLIX không cần)
+4. Nhấp "Save"
+```
+
+**Bước 6: Deploy**
+```
+1. Nhấp nút "Deploy"
+2. Vercel sẽ bắt đầu build ứng dụng của bạn
+3. Đợi cho đến khi thấy thông báo "Deployment successful!"
+4. Sao chép URL được cung cấp (dạng: https://movie-app-<random>.vercel.app)
+5. Ứng dụng của bạn giờ đã sống trên internet!
+```
+
+**Bước 7: Kiểm Tra Ứng Dụng**
+```
+1. Mở URL được cung cấp trong trình duyệt
+2. Kiểm tra xem tất cả tính năng có hoạt động không:
+   - Danh mục phim hiển thị
+   - Tìm kiếm hoạt động
+   - Lọc phim hoạt động
+   - Yêu thích lưu trữ (localStorage)
+3. Kiểm tra responsive design trên di động
+4. Nếu có lỗi, kiểm tra logs trên Vercel Dashboard
+```
+
+**Bước 8: Tùy Chỉnh Domain (Tùy Chọn)**
+```
+Nếu bạn muốn sử dụng domain tùy chỉnh:
+1. Trên Vercel Dashboard, chọn project
+2. Chọn tab "Settings"
+3. Tìm "Domains"
+4. Nhấp "Add"
+5. Nhập domain của bạn
+6. Cập nhật DNS records theo hướng dẫn của Vercel
+```
+
+**Cập Nhật Sau Này**
+```
+Mỗi khi bạn push code mới lên GitHub:
+git add .
+git commit -m "Update description"
+git push
+
+Vercel sẽ tự động deploy phiên bản mới!
+```
+
+**Lợi Ích Của Vercel**
+- ✓ Triển khai miễn phí
+- ✓ Tự động build & deploy khi push code
+- ✓ SSL/HTTPS tự động
+- ✓ CDN toàn cầu (tốc độ nhanh)
+- ✓ Analytics & monitoring tích hợp
 
 ### Triển Khai Lên Netlify
 
