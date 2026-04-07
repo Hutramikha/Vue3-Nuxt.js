@@ -8,7 +8,6 @@
  */
 
 import { useMovieDetail } from '~/composables/useMovieDetail'
-import { useVideoPlayer } from '~/composables/useVideoPlayer'
 import { useMovieStore } from '~/stores/movieStore'
 import { generateMovieMeta, generatePageTitle } from '~/utils/seo'
 import { ref, computed } from 'vue'
@@ -20,9 +19,6 @@ isLoading.value = false
 
 // ========== MOVIE DETAIL COMPOSABLE ==========
 const { movieId, movie, isMovieFound } = useMovieDetail(allMovies)
-
-// ========== VIDEO PLAYER COMPOSABLE ==========
-const { playerState, togglePlay, toggleMute, handleProgressClick, getProgressPercentage } = useVideoPlayer()
 
 // ========== MOVIE STORE - FAVORITES ==========
 const movieStore = useMovieStore()
@@ -179,7 +175,7 @@ useHead({
             <!-- 2 Cột: Tóm Tắt (Trái) + Trailer (Phải) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <!-- Cột Trái: Tóm Tắt Phim -->
-              <div class="md:col-span-1" ref="trailerSection">
+              <div class="md:col-span-1">
                 <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg p-6 border border-emerald-600/20">
                   <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
                     <Icon name="heroicons-solid:document-text" class="w-5 h-5 text-emerald-500" />
@@ -192,63 +188,20 @@ useHead({
               </div>
 
               <!-- Cột Phải: Trailer Video Player (Rộng hơn) -->
-              <div class="md:col-span-2">
+              <div class="md:col-span-2" ref="trailerSection">
                 <div class="space-y-4">
                   <!-- Trailer Video Area -->
                   <div class="bg-black rounded-lg h-96 flex items-center justify-center relative shadow-lg border border-emerald-600/20 overflow-hidden">
                     <iframe 
                       width="100%" 
                       height="100%" 
-                      :src="movie.trailerUrl" 
+                      :src="`${movie.trailerUrl}?controls=1&rel=0&modestbranding=1`" 
                       :title="`Trailer - ${movie.title}`"
                       frameborder="0" 
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                       allowfullscreen
                       class="rounded-lg"
                     ></iframe>
-                  </div>
-
-                  <!-- Trailer Controls -->
-                  <div class="flex items-center gap-3">
-                    <button
-                      @click="togglePlay"
-                      :class="[
-                        'px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 text-sm',
-                        playerState.isPlaying
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                      ]"
-                    >
-                      <Icon :name="playerState.isPlaying ? 'heroicons-solid:pause' : 'heroicons-solid:play'" class="w-4 h-4" />
-                      {{ playerState.isPlaying ? 'Tạm Dừng' : 'Phát' }}
-                    </button>
-
-                    <button
-                      @click="toggleMute"
-                      :class="[
-                        'px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 text-sm',
-                        playerState.isMuted
-                          ? 'bg-red-600 hover:bg-red-700 text-white'
-                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                      ]"
-                    >
-                      <Icon :name="playerState.isMuted ? 'heroicons-solid:speaker-x-mark' : 'heroicons-solid:speaker-wave'" class="w-4 h-4" />
-                    </button>
-
-                    <select v-model.number="playerState.playbackRate" class="px-3 py-2 rounded-lg bg-gray-700 text-white text-sm font-semibold">
-                      <option :value="0.5">0.5x</option>
-                      <option :value="1">1x</option>
-                      <option :value="1.5">1.5x</option>
-                      <option :value="2">2x</option>
-                    </select>
-                  </div>
-
-                  <!-- Progress Bar -->
-                  <div class="w-full bg-gray-700 rounded-full h-1.5 cursor-pointer hover:h-2 transition" @click="handleProgressClick($event, 5400)">
-                    <div
-                      class="bg-emerald-600 h-full rounded-full transition-all duration-100"
-                      :style="{ width: `${getProgressPercentage(5400)}%` }"
-                    />
                   </div>
                 </div>
               </div>
