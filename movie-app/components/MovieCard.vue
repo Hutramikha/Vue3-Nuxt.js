@@ -2,14 +2,21 @@
 import { computed } from 'vue'
 import { useMovieStore } from '~/stores/movieStore'
 
+interface Movie {
+  id: number
+  title: string
+  poster: string
+  year: string
+  genre: string
+  rating: number
+  synopsis?: string
+  trailerUrl?: string
+  type?: string
+}
+
 // ========== NHẬN DỮ LIỆU TỪ COMPONENT CHA ==========
 // Movie object chứa thông tin: id, title, poster, year, genre, rating
-const props = defineProps({
-  movie: {
-    type: Object as () => any,
-    required: true
-  }
-})
+const props = defineProps<{ movie: Movie }>()
 
 // ========== QUẢN LÝ STATE ==========
 // Kết nối với Pinia store để quản lý danh sách yêu thích
@@ -63,7 +70,8 @@ const toggleFavorite = async (e: Event) => {
           
           <!-- Nút Yêu Thích: thay đổi màu sắc nếu yêu thích -->
           <button
-            @click="toggleFavorite"
+            type="button"
+            @click.stop.prevent="toggleFavorite"
             :class="[
               'p-2 rounded-full transition-all duration-200 transform hover:scale-110',
               isFavorited
@@ -71,6 +79,7 @@ const toggleFavorite = async (e: Event) => {
                 : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40'
             ]"
             :title="isFavorited ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'"
+            :aria-label="isFavorited ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'"
           >
             <!-- Icon trái tim: đầy đủ nếu yêu thích, rỗng nếu chưa -->
             <Icon 
