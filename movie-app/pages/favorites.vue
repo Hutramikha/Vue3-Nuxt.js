@@ -127,7 +127,7 @@ const clearAllFavorites = () => {
     <div v-if="isEmpty && !isLoading" class="flex flex-col items-center justify-center py-20">
       <Icon name="heroicons-solid:heart-slash" class="w-20 h-20 text-gray-600 mb-4" />
       <h2 class="text-3xl font-bold text-gray-400 mb-2">Chưa Có Phim Yêu Thích</h2>
-      <p class="text-gray-500 mb-8">Hãy thêm những bộ phim bạn yêu thích bằng cách nhấp vào nút ❤️</p>
+      <p class="text-gray-500 mb-8">Hãy thêm những bộ phim bạn yêu thích bằng cách nhấp vào nút <Icon name="heroicons-solid:heart" class="w-5 h-5 text-emerald-500 inline-block" /></p>
       <button
         @click="backToHome"
         class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition"
