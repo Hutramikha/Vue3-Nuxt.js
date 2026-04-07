@@ -8,20 +8,39 @@
  */
 
 import { useMovieDetail } from '~/composables/useMovieDetail'
+import { useErrorHandler } from '~/composables/useError'
 import { useMovieStore } from '~/stores/movieStore'
 import { generateMovieMeta, generatePageTitle } from '~/utils/seo'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 // ========== LẤY DỮ LIỆU PHIM ==========
+const { addError } = useErrorHandler()
 const isLoading = ref(true)
-const { data: allMovies } = await useFetch('/api/movies')
-isLoading.value = false
+const { data: allMovies, error, pending } = await useFetch('/api/movies')
 
 // ========== MOVIE DETAIL COMPOSABLE ==========
-const { movieId, movie, isMovieFound } = useMovieDetail(allMovies)
+const { movieId, movie, isMovieFound, getRelatedMovies } = useMovieDetail(allMovies)
 
 // ========== MOVIE STORE - FAVORITES ==========
 const movieStore = useMovieStore()
+
+// ========== FETCH STATE ==========
+watch(pending, (newPending) => {
+  isLoading.value = newPending
+}, { immediate: true })
+
+watch(error, (newError) => {
+  if (newError) {
+    console.error('API Error:', newError)
+    addError('Lỗi tải dữ liệu phim. Vui lòng thử lại sau.')
+  }
+}, { immediate: true })
+
+const hasFetchError = computed(() => !!error.value)
+const relatedMovies = computed(() => {
+  if (!movie.value) return []
+  return getRelatedMovies(4)
+})
 
 // Check nếu phim hiện tại là favorite
 const isFavorited = computed(() => {
@@ -54,8 +73,17 @@ useHead({
     <!-- Loading State -->
     <LoadingSpinner :isVisible="isLoading" />
 
+    <!-- Lỗi fetch dữ liệu -->
+    <div v-if="hasFetchError" class="flex items-center justify-center py-20">
+      <div class="text-center max-w-lg px-4">
+        <Icon name="heroicons-solid:exclamation-circle" class="w-16 h-16 text-red-500 mx-auto mb-4" />
+        <h1 class="text-4xl font-bold text-white mb-2">Lỗi tải dữ liệu phim</h1>
+        <p class="text-gray-400 mb-6">Không thể tải dữ liệu phim. Vui lòng làm mới trang hoặc thử lại sau.</p>
+      </div>
+    </div>
+
     <!-- Phim Không Tìm Thấy -->
-    <div v-if="!isLoading && !isMovieFound" class="flex items-center justify-center py-20">
+    <div v-else-if="!isLoading && !isMovieFound" class="flex items-center justify-center py-20">
       <div class="text-center">
         <Icon name="heroicons-solid:exclamation-circle" class="w-16 h-16 text-red-500 mx-auto mb-4" />
         <h1 class="text-4xl font-bold text-white mb-2">Phim Không Tìm Thấy</h1>
@@ -205,6 +233,18 @@ useHead({
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Related Movies -->
+          <div v-if="relatedMovies.length" class="mt-16 pt-8 border-t border-gray-700">
+            <h2 class="text-2xl font-bold text-white mb-6">Phim cùng thể loại</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <MovieCard
+                v-for="relatedMovie in relatedMovies"
+                :key="relatedMovie.id"
+                :movie="relatedMovie"
+              />
             </div>
           </div>
         </div>
