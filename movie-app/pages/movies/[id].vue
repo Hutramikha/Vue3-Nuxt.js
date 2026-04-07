@@ -9,10 +9,9 @@
 
 import { useMovieDetail } from '~/composables/useMovieDetail'
 import { useVideoPlayer } from '~/composables/useVideoPlayer'
-import { useNavigation } from '~/composables/useNavigation'
 import { useMovieStore } from '~/stores/movieStore'
 import { generateMovieMeta, generatePageTitle } from '~/utils/seo'
-import { watch, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 
 // ========== LẤY DỮ LIỆU PHIM ==========
 const isLoading = ref(true)
@@ -25,9 +24,6 @@ const { movieId, movie, isMovieFound } = useMovieDetail(allMovies)
 // ========== VIDEO PLAYER COMPOSABLE ==========
 const { playerState, togglePlay, toggleMute, handleProgressClick, getProgressPercentage } = useVideoPlayer()
 
-// ========== NAVIGATION COMPOSABLE ==========
-const { goBack } = useNavigation()
-
 // ========== MOVIE STORE - FAVORITES ==========
 const movieStore = useMovieStore()
 
@@ -39,6 +35,13 @@ const isFavorited = computed(() => {
 // Toggle favorite
 const toggleFavorite = async () => {
   await movieStore.toggleFavorite(movieId.value)
+}
+
+// ========== TRAILER SCROLL ==========
+const trailerSection = ref<HTMLDivElement | null>(null)
+
+const scrollToTrailer = () => {
+  trailerSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 
@@ -143,7 +146,7 @@ useHead({
 
               <!-- Nút Hành Động -->
               <div class="flex gap-4">
-                <button class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition flex items-center gap-2 shadow-lg">
+                <button @click="scrollToTrailer" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition flex items-center gap-2 shadow-lg">
                   <Icon name="heroicons-solid:play" class="w-5 h-5" />
                   Xem Ngay
                 </button>
@@ -176,7 +179,7 @@ useHead({
             <!-- 2 Cột: Tóm Tắt (Trái) + Trailer (Phải) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
               <!-- Cột Trái: Tóm Tắt Phim -->
-              <div class="md:col-span-1">
+              <div class="md:col-span-1" ref="trailerSection">
                 <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg p-6 border border-emerald-600/20">
                   <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
                     <Icon name="heroicons-solid:document-text" class="w-5 h-5 text-emerald-500" />
