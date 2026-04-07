@@ -61,7 +61,11 @@ const toggleForm = () => {
 
 // Hàm xử lý khi người dùng gửi form
 const handleSubmit = () => {
-  if (isLoginForm.value) {
+  if (!isLoginForm.value && formData.password !== formData.confirmPassword) {
+    alert('Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.')
+    return
+  }
+  if (isLoginForm.value){
     // Người dùng đăng nhập
     console.log('Đăng nhập:', {
       email: formData.email,
