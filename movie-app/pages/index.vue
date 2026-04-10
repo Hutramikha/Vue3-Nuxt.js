@@ -56,28 +56,33 @@ import { useMovieCategories } from '~/composables/useMovieCategories'
 import { useMovieCategoryFilter } from '~/composables/useMovieCategoryFilter'
 
 // ============================================
-// PHẦN 1: LẤY DỮ LIỆU PHIM TỪ API
+// PHẦN 1: LẤY DỮ LIỆU PHIM TỪ API (TỐI ƯU VỚI LAZY LOADING)
 // ============================================
 // allMovies: danh sách 50 phim lấy từ server (API endpoint: /api/movies)
 // pending: hiển thị loading spinner trong khi tải dữ liệu
+// lazy: true → Trang render ngay, dữ liệu load sau (tối ưu UX)
 const { addError } = useErrorHandler()
 const allMovies = ref<any[]>([])
-const isLoading = ref(true)
+const isLoading = ref(false)  // ← Set false vì lazy: true (page render trước)
 
-// Fetch dữ liệu phim từ API
-const { data, error, pending, refresh } = await useFetch('/api/movies')
+// Fetch dữ liệu phim từ API với lazy: true để tối ưu tải dữ liệu
+const { data, error, pending, refresh } = await useFetch('/api/movies', {
+  lazy: true  // ← QUAN TRỌNG: Page render ngay, data load sau (tối ưu performance)
+})
 
-// Gán dữ liệu và setup watchers
+// Tự động cập nhật isLoading khi pending thay đổi
+watch(pending, (newPending) => {
+  isLoading.value = newPending
+}, { immediate: true })
+
+// Gán dữ liệu phim khi fetch từ API thành công
 watch(data, (newData) => {
   if (newData && Array.isArray(newData)) {
     allMovies.value = newData
   }
 }, { immediate: true })
 
-watch(pending, (newPending) => {
-  isLoading.value = newPending
-}, { immediate: true })
-
+// Xử lý lỗi nếu API fail
 watch(error, (newError) => {
   if (newError) {
     console.error('API Error:', newError)
