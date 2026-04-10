@@ -1,12 +1,8 @@
 // ========== LOCALSTORAGE UTILITIES ==========
-// Quản lý lưu trữ dữ liệu cục bộ: danh sách phim yêu thích
-
-// ========== FAVORITES - YÊU THÍCH PHIM ==========
 
 const FAVORITES_KEY = 'favorites'
 
 // ========== GET FAVORITES ==========
-// Trả về array của tất cả favorite movie IDs
 export const getFavorites = (): number[] => {
   try {
     const data = localStorage.getItem(FAVORITES_KEY)
@@ -18,7 +14,6 @@ export const getFavorites = (): number[] => {
 }
 
 // ========== SET FAVORITES ==========
-// Lưu toàn bộ danh sách yêu thích
 export const setFavorites = (favorites: number[]): void => {
   try {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites))
@@ -28,41 +23,36 @@ export const setFavorites = (favorites: number[]): void => {
 }
 
 // ========== ADD FAVORITE TO STORAGE ==========
-// Thêm một phim vào yêu thích
 export const addFavoriteToStorage = (movieId: number): void => {
   const favorites = getFavorites()
   
-  // Nếu chưa có thì thêm
   if (!favorites.includes(movieId)) {
     favorites.push(movieId)
     setFavorites(favorites)
-    console.log(`✅ Added to favorites: ${movieId}`)
+    console.log(`Added to favorites: ${movieId}`)
   }
 }
 
 // ========== REMOVE FAVORITE FROM STORAGE ==========
-// Xóa một phim khỏi yêu thích
 export const removeFavoriteFromStorage = (movieId: number): void => {
   const favorites = getFavorites()
   
   const filtered = favorites.filter(id => id !== movieId)
   setFavorites(filtered)
-  console.log(`❌ Removed from favorites: ${movieId}`)
+  console.log(`Removed from favorites: ${movieId}`)
 }
 
 // ========== CHECK IF FAVORITED ==========
-// Kiểm tra xem phim có trong danh sách yêu thích không
 export const isFavoritedInStorage = (movieId: number): boolean => {
   const favorites = getFavorites()
   return favorites.includes(movieId)
 }
 
 // ========== CLEAR ALL FAVORITES ==========
-// Xóa toàn bộ danh sách yêu thích
 export const clearAllFavorites = (): void => {
   try {
     localStorage.removeItem(FAVORITES_KEY)
-    console.log('🗑️ Cleared all favorites')
+    console.log('Cleared all favorites')
   } catch (error) {
     console.error('Lỗi xóa danh sách yêu thích:', error)
   }
