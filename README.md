@@ -416,7 +416,7 @@ Cảm ơn các tác giả/thư viện:
 
 ## Roadmap
 
-### **v1.1** (Soon)
+### **v1.1**
 - [ ] User authentication (đăng nhập/ký)
 - [ ] Watch history (lịch sử xem)
 - [ ] Watchlist (danh sách theo dõi)
@@ -436,4 +436,3 @@ Cảm ơn các tác giả/thư viện:
 
 ---
 
-**Made with Love using Nuxt 4 & Vue 3**
