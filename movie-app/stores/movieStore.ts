@@ -1,67 +1,60 @@
-// ========== MOVIE STORE (PINIA) ==========
-// Quản lý state: favorites
-
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { 
   getFavorites, 
   setFavorites, 
   addFavoriteToStorage, 
-  removeFavoriteFromStorage 
+  removeFavoriteFromStorage,
+  type FavoriteItem
 } from '~/utils/localStorage'
 
 export const useMovieStore = defineStore('movie', () => {
   // ========== STATE ==========
-  
-  // favorites: Map ID phim → favorited (true/false)
-  // Dùng Map để O(1) lookup khi check favorite status
-  const favorites = ref<Map<number, boolean>>(new Map())
+  // favorites: Map ID phim → timestamp (thời gian thêm vào yêu thích)
+  const favorites = ref<Map<number, number>>(new Map())
 
   // ========== INIT ==========
-  
-  // Tải favorites từ localStorage khi store khởi tạo
   const initFavorites = () => {
     const savedFavorites = getFavorites()
-    favorites.value = new Map(savedFavorites.map(id => [id, true]))
+    favorites.value = new Map(savedFavorites.map(item => [item.movieId, item.addedAt]))
   }
 
   // ========== COMPUTED ==========
-
-  // favoriteIds: Trả về array của tất cả favorite movie IDs
   const favoriteIds = computed(() => {
     return Array.from(favorites.value.keys())
   })
 
-  // favoriteCount: Số lượng phim yêu thích
   const favoriteCount = computed(() => {
     return favorites.value.size
   })
 
-  // ========== METHODS ==========
+  // Trả về danh sách yêu thích với timestamp, sắp xếp theo thời gian (mới nhất trước)
+  const getFavoritesWithTimestamp = computed(() => {
+    const items: FavoriteItem[] = Array.from(favorites.value.entries()).map(([movieId, addedAt]) => ({
+      movieId,
+      addedAt
+    }))
+    // Sắp xếp theo thời gian: mới nhất trước
+    return items.sort((a, b) => b.addedAt - a.addedAt)
+  })
 
-  // isFavorited(movieId): Check xem phim có là favorite không
+  // ========== METHODS ==========
   const isFavorited = (movieId: number): boolean => {
     return favorites.value.has(movieId)
   }
 
-  // addFavorite(movieId): Thêm phim vào yêu thích
   const addFavorite = async (movieId: number): Promise<void> => {
     if (!favorites.value.has(movieId)) {
-      favorites.value.set(movieId, true)
-      
-      // Lưu vào localStorage
+      favorites.value.set(movieId, Date.now())
       addFavoriteToStorage(movieId)
       
       console.log(`Added to favorites: ${movieId}`)
     }
   }
 
-  // removeFavorite(movieId): Xóa phim khỏi yêu thích
   const removeFavorite = async (movieId: number): Promise<void> => {
     if (favorites.value.has(movieId)) {
       favorites.value.delete(movieId)
-      
-      // Xóa khỏi localStorage
       removeFavoriteFromStorage(movieId)
       
       console.log(`Removed from favorites: ${movieId}`)
@@ -93,6 +86,7 @@ export const useMovieStore = defineStore('movie', () => {
     // Computed
     favoriteIds,
     favoriteCount,
+    getFavoritesWithTimestamp,
 
     // Methods
     initFavorites,

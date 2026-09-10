@@ -2,8 +2,15 @@
 
 const FAVORITES_KEY = 'favorites'
 
+// ========== INTERFACE ==========
+export interface FavoriteItem {
+  movieId: number
+  addedAt: number  // Timestamp (milliseconds) khi thêm vào yêu thích
+}
+
 // ========== GET FAVORITES ==========
-export const getFavorites = (): number[] => {
+// Trả về mảng các item yêu thích với thông tin timestamp
+export const getFavorites = (): FavoriteItem[] => {
   try {
     const data = localStorage.getItem(FAVORITES_KEY)
     return data ? JSON.parse(data) : []
@@ -14,7 +21,7 @@ export const getFavorites = (): number[] => {
 }
 
 // ========== SET FAVORITES ==========
-export const setFavorites = (favorites: number[]): void => {
+export const setFavorites = (favorites: FavoriteItem[]): void => {
   try {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites))
   } catch (error) {
@@ -23,13 +30,20 @@ export const setFavorites = (favorites: number[]): void => {
 }
 
 // ========== ADD FAVORITE TO STORAGE ==========
+// Thêm phim với timestamp hiện tại
 export const addFavoriteToStorage = (movieId: number): void => {
   const favorites = getFavorites()
   
-  if (!favorites.includes(movieId)) {
-    favorites.push(movieId)
+  // Kiểm tra xem movieId đã tồn tại chưa
+  const exists = favorites.some(item => item.movieId === movieId)
+  
+  if (!exists) {
+    favorites.push({
+      movieId,
+      addedAt: Date.now()  // Timestamp hiện tại
+    })
     setFavorites(favorites)
-    console.log(`Added to favorites: ${movieId}`)
+    console.log(`Added to favorites: ${movieId} at ${new Date().toLocaleString()}`)
   }
 }
 
@@ -37,7 +51,7 @@ export const addFavoriteToStorage = (movieId: number): void => {
 export const removeFavoriteFromStorage = (movieId: number): void => {
   const favorites = getFavorites()
   
-  const filtered = favorites.filter(id => id !== movieId)
+  const filtered = favorites.filter(item => item.movieId !== movieId)
   setFavorites(filtered)
   console.log(`Removed from favorites: ${movieId}`)
 }
@@ -45,7 +59,7 @@ export const removeFavoriteFromStorage = (movieId: number): void => {
 // ========== CHECK IF FAVORITED ==========
 export const isFavoritedInStorage = (movieId: number): boolean => {
   const favorites = getFavorites()
-  return favorites.includes(movieId)
+  return favorites.some(item => item.movieId === movieId)
 }
 
 // ========== CLEAR ALL FAVORITES ==========
