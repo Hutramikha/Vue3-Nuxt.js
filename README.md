@@ -1,4 +1,4 @@
-# 🎬 KHANLIX - Nền Tảng Xem Phim Trực Tuyến
+# KHANLIX - Nền Tảng Xem Phim Trực Tuyến
 
 [![Nuxt](https://img.shields.io/badge/Nuxt-4.4.2-00DC82?logo=nuxt.js)](https://nuxt.com)
 [![Vue](https://img.shields.io/badge/Vue-3.5.30-4FC08D?logo=vue.js)](https://vuejs.org)
@@ -328,7 +328,7 @@ Tất cả trạng thái phân trang được sync với URL:
 ## Testing & Development
 
 ### **Build Status**
-✅ Nuxt Build: **Success** (238 modules)
+Nuxt Build: **Success** (238 modules)
 
 ### **Browser Support**
 - ✓ Chrome/Edge (latest)
